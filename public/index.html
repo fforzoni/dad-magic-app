@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dad's Magic Movie App - Customer View</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        .info-box {
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            padding: 30px;
+            margin: 20px 0;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        .info-box h2 {
+            color: #ffd700;
+            margin-bottom: 15px;
+        }
+        .button {
+            display: inline-block;
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            color: white;
+            padding: 15px 30px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: bold;
+            margin: 10px;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        .button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        }
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+        .feature {
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        .feature h3 {
+            color: #ffd700;
+            margin-bottom: 15px;
+        }
+        .emoji {
+            font-size: 3rem;
+            margin-bottom: 15px;
+        }
+        .status {
+            background: rgba(76, 175, 80, 0.2);
+            border: 2px solid #4caf50;
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            margin: 20px 0;
+        }
+        .status.offline {
+            background: rgba(244, 67, 54, 0.2);
+            border-color: #f44336;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎬 Dad's Magic Movie App</h1>
+            <p>Customer View - Browse and Select Movies</p>
+        </div>
+
+        <div class="status" id="status">
+            <strong>🟢 Status:</strong> Ready for movie selection
+        </div>
+
+        <div class="info-box">
+            <h2>🎯 How It Works</h2>
+            <p>This is the customer-facing app where you can browse and select movies. When you tap a movie, it instantly appears on the magician's screen in real-time!</p>
+        </div>
+
+        <div class="features">
+            <div class="feature">
+                <div class="emoji">🎭</div>
+                <h3>Browse Movies</h3>
+                <p>Explore thousands of movies organized by genre</p>
+            </div>
+            <div class="feature">
+                <div class="emoji">⚡</div>
+                <h3>Real-time Sync</h3>
+                <p>Your selections appear instantly on the magician's screen</p>
+            </div>
+            <div class="feature">
+                <div class="emoji">🎩</div>
+                <h3>Magic Shows</h3>
+                <p>Perfect for interactive magic performances</p>
+            </div>
+        </div>
+
+        <div class="info-box">
+            <h2>🔗 Access Links</h2>
+            <p><strong>Customer App (This Page):</strong> Available worldwide via GitHub Pages</p>
+            <p><strong>Magician App:</strong> Requires local network access for real-time updates</p>
+            <p><strong>Socket Server:</strong> Handles real-time communication between apps</p>
+        </div>
+
+        <div style="text-align: center; margin: 40px 0;">
+            <a href="https://github.com/yourusername/dad-magic-app" class="button" target="_blank">
+                📁 View on GitHub
+            </a>
+            <a href="http://192.168.1.99:19006/Magician" class="button" target="_blank">
+                🎩 Magician View
+            </a>
+        </div>
+
+        <div class="info-box">
+            <h2>📱 For Live Testing</h2>
+            <p>To test the full real-time functionality, you'll need to access the local development version:</p>
+            <p><strong>Local Customer App:</strong> <code>http://192.168.1.99:19006</code></p>
+            <p><strong>Local Magician App:</strong> <code>http://192.168.1.99:19006/Magician</code></p>
+        </div>
+    </div>
+
+    <script>
+        // Simple status indicator
+        function updateStatus() {
+            const status = document.getElementById('status');
+            const now = new Date();
+            const timeString = now.toLocaleTimeString();
+            
+            // Simulate online status
+            status.innerHTML = `<strong>🟢 Status:</strong> Online - Last updated: ${timeString}`;
+        }
+
+        // Update status every 30 seconds
+        setInterval(updateStatus, 30000);
+        updateStatus();
+    </script>
+</body>
+</html>
