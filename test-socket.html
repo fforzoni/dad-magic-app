@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Socket Test</title>
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+</head>
+<body>
+    <h1>Socket Connection Test</h1>
+    <button onclick="testConnection()">Test Connection</button>
+    <button onclick="sendTestMovie()">Send Test Movie</button>
+    <div id="status">Not connected</div>
+    <div id="logs"></div>
+
+    <script>
+        const socket = io('http://192.168.1.99:3001');
+        
+        socket.on('connect', () => {
+            document.getElementById('status').textContent = 'Connected!';
+            console.log('Connected to socket server');
+            
+            // Join the default room
+            socket.emit('join-room', { roomId: 'default-room' });
+        });
+        
+        socket.on('disconnect', () => {
+            document.getElementById('status').textContent = 'Disconnected';
+            console.log('Disconnected from socket server');
+        });
+        
+        socket.on('room-joined', (data) => {
+            console.log('Joined room:', data);
+            addLog('Joined room: ' + data.roomId);
+        });
+        
+        socket.on('movie-selected', (data) => {
+            console.log('Movie selected:', data);
+            addLog('Movie selected: ' + data.movie.title);
+        });
+        
+        function testConnection() {
+            addLog('Testing connection...');
+            console.log('Socket ID:', socket.id);
+            console.log('Connected:', socket.connected);
+        }
+        
+        function sendTestMovie() {
+            const testMovie = {
+                id: 123,
+                title: 'Test Movie',
+                overview: 'This is a test movie',
+                poster_path: '/test.jpg',
+                release_date: '2024-01-01',
+                vote_average: 8.5
+            };
+            
+            const data = {
+                roomId: 'default-room',
+                movie: testMovie,
+                timestamp: Date.now(),
+                clientId: socket.id
+            };
+            
+            addLog('Sending test movie: ' + testMovie.title);
+            socket.emit('select-movie', data);
+        }
+        
+        function addLog(message) {
+            const logs = document.getElementById('logs');
+            const logEntry = document.createElement('div');
+            logEntry.textContent = new Date().toLocaleTimeString() + ': ' + message;
+            logs.appendChild(logEntry);
+        }
+    </script>
+</body>
+</html>
