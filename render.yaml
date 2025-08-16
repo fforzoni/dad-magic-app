@@ -4,7 +4,7 @@ services:
     env: node
     plan: free
     buildCommand: npm install
-    startCommand: npm start
+    startCommand: npm run test
     rootDir: render-server
     envVars:
       - key: NODE_ENV
