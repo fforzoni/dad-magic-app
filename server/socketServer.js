@@ -31,6 +31,16 @@ app.get('/ping', (req, res) => {
   res.status(200).send('pong');
 });
 
+// Render health check endpoint
+app.get('/render-health', (req, res) => {
+  res.status(200).json({
+    status: 'healthy',
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+    version: process.version
+  });
+});
+
 // Store active rooms and their clients
 const rooms = new Map();
 
@@ -204,11 +214,23 @@ app.use((req, res) => {
 
 const PORT = process.env.PORT || 3001;
 
+// Basic error handling for startup
+process.on('uncaughtException', (err) => {
+  console.error('Uncaught Exception:', err);
+  process.exit(1);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+  process.exit(1);
+});
+
 console.log('Starting socket server...');
 console.log('Environment variables:');
 console.log('- PORT:', process.env.PORT);
 console.log('- NODE_ENV:', process.env.NODE_ENV);
 console.log('Using port:', PORT);
+console.log('Node.js version:', process.version);
 
 server.listen(PORT, () => {
   console.log('==========================================');
