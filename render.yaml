@@ -3,9 +3,11 @@ services:
     name: dad-magic-socket-server
     env: node
     plan: free
-    buildCommand: npm install
-    startCommand: npm run ultra
+    buildCommand: echo "No build needed" && echo "Node version:" && node --version
+    startCommand: node ultra-simple.js
     rootDir: render-server
     envVars:
       - key: NODE_ENV
         value: production
+      - key: PORT
+        value: 10000
