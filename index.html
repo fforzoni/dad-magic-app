@@ -556,8 +556,10 @@
         // Configuration
         const TMDB_API_KEY = '462b797169ca3170f8971775670b86ac'; // Your TMDB API key
         const TMDB_BASE_URL = 'https://api.themoviedb.org/3';
-        // Always use local socket server for now (until we deploy to cloud)
-        const SOCKET_SERVER_URL = 'http://172.20.10.3:3001';
+        // Try local socket server first, fallback to public server for Netlify
+        const SOCKET_SERVER_URL = window.location.hostname === 'localhost' || window.location.hostname.includes('172.20.10.3') 
+            ? 'http://172.20.10.3:3001' 
+            : 'https://dad-magic-socket.herokuapp.com';
 
         // State
         let genres = [];
@@ -607,11 +609,14 @@
                     return aPriority - bPriority;
                 });
 
-                // Load movies for each genre
+                // Load movies for each genre, but preserve existing movies with actors
                 for (const genre of genres) {
-                    const moviesResponse = await fetch(`${TMDB_BASE_URL}/discover/movie?api_key=${TMDB_API_KEY}&language=en-US&sort_by=popularity.desc&include_adult=false&include_video=false&page=1&with_genres=${genre.id}`);
-                    const moviesData = await moviesResponse.json();
-                    moviesByGenre[genre.id] = moviesData.results.slice(0, 20);
+                    // Only load from TMDB if we don't already have movies for this genre
+                    if (!moviesByGenre[genre.id] || moviesByGenre[genre.id].length === 0) {
+                        const moviesResponse = await fetch(`${TMDB_BASE_URL}/discover/movie?api_key=${TMDB_API_KEY}&language=en-US&sort_by=popularity.desc&include_adult=false&include_video=false&page=1&with_genres=${genre.id}`);
+                        const moviesData = await moviesResponse.json();
+                        moviesByGenre[genre.id] = moviesData.results.slice(0, 20);
+                    }
                 }
 
                 renderGenreSections();
