@@ -1,0 +1,27 @@
+# Ignore React Native/Expo files for Render deployment
+*.js
+!server/**/*.js
+!server/**/*.json
+!server/**/*.yaml
+!server/**/*.yml
+!render.yaml
+!.render-buildpacks
+!.renderignore
+
+# Ignore all non-server files
+App.js
+app.json
+babel.config.js
+package.json
+package-lock.json
+node_modules/
+.expo/
+assets/
+components/
+screens/
+services/
+src/
+public/
+*.md
+*.sh
+*.html
