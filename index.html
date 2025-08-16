@@ -411,23 +411,7 @@
             margin-top: 25px;
         }
 
-        .selectButton {
-            background: linear-gradient(45deg, #f5c518, #f4d03f);
-            color: #000;
-            padding: 15px 40px;
-            border: none;
-            border-radius: 25px;
-            font-size: 1.1rem;
-            font-weight: bold;
-            cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
-            box-shadow: 0 8px 25px rgba(245, 197, 24, 0.3);
-        }
 
-        .selectButton:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 12px 35px rgba(245, 197, 24, 0.4);
-        }
 
 
 
@@ -527,9 +511,7 @@
             <div class="modalBody" id="modalBody">
                 <!-- Modal content will be loaded here -->
             </div>
-            <div class="modalActions">
-                <button class="selectButton" onclick="selectMovie()">🎯 Select This Movie</button>
-            </div>
+
         </div>
     </div>
 
@@ -869,31 +851,7 @@
             selectedMovie = null;
         }
 
-        // Select movie (send to magician)
-        function selectMovie() {
-            if (selectedMovie && socket) {
-                socket.emit('movieSelected', {
-                    title: selectedMovie.title,
-                    year: new Date(selectedMovie.release_date).getFullYear(),
-                    poster: `https://image.tmdb.org/t/p/w500${selectedMovie.poster_path}`,
-                    rating: selectedMovie.vote_average ? selectedMovie.vote_average.toFixed(1) : 'N/A',
-                    genre: selectedMovie.genre_ids ? getGenreName(selectedMovie.genre_ids[0]) : 'Unknown'
-                });
 
-                // Show success message
-                const btn = document.querySelector('.selectButton');
-                const originalText = btn.textContent;
-                btn.textContent = '✅ Movie Sent!';
-                btn.style.background = 'linear-gradient(45deg, #27ae60, #2ecc71)';
-                
-                setTimeout(() => {
-                    btn.textContent = originalText;
-                    btn.style.background = 'linear-gradient(45deg, #f5c518, #f4d03f)';
-                }, 2000);
-
-                closeModal();
-            }
-        }
 
         // Get genre name by ID
         function getGenreName(genreId) {
