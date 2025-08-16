@@ -212,15 +212,15 @@ console.log('Using port:', PORT);
 
 server.listen(PORT, () => {
   console.log('==========================================');
-  console.log(`✅ Socket server started successfully!`);
-  console.log(`🌐 Server running on port: ${PORT}`);
-  console.log(`🕐 Started at: ${new Date().toISOString()}`);
-  console.log(`🔧 Environment: ${process.env.NODE_ENV || 'development'}`);
-  console.log(`🆔 Process ID: ${process.pid}`);
-  console.log(`📡 Socket.IO server ready for connections`);
+  console.log('Socket server started successfully!');
+  console.log(`Server running on port: ${PORT}`);
+  console.log(`Started at: ${new Date().toISOString()}`);
+  console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
+  console.log(`Process ID: ${process.pid}`);
+  console.log('Socket.IO server ready for connections');
   console.log('==========================================');
 }).on('error', (err) => {
-  console.error('❌ Failed to start server:', err);
+  console.error('Failed to start server:', err);
   console.error('Error details:', err.message);
   console.error('Error code:', err.code);
   process.exit(1);
