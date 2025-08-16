@@ -272,20 +272,26 @@
             height: 100%;
             background-color: rgba(0,0,0,0.8);
             backdrop-filter: blur(5px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            box-sizing: border-box;
         }
 
         .modalContent {
             background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
-            margin: 5% auto;
-            padding: 30px;
             border-radius: 20px;
-            width: 90%;
+            padding: 30px;
+            width: 100%;
             max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
             position: relative;
             border: 2px solid #f5c518;
             box-shadow: 0 20px 60px rgba(0,0,0,0.5);
-            max-height: 80vh;
-            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
         }
 
         .closeButton {
@@ -314,6 +320,15 @@
             display: flex;
             gap: 20px;
             align-items: flex-start;
+            flex: 1;
+        }
+
+        @media (max-width: 768px) {
+            .modalBody {
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+            }
         }
 
         .posterContainer {
@@ -395,6 +410,33 @@
         .detailText {
             font-size: 14px;
             color: #ccc;
+        }
+
+        .actorsSection {
+            margin-bottom: 20px;
+        }
+
+        .actorsTitle {
+            font-size: 18px;
+            font-weight: bold;
+            color: #f5c518;
+            margin-bottom: 15px;
+        }
+
+        .actorsList {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .actorItem {
+            background: rgba(245, 197, 24, 0.1);
+            border: 1px solid #f5c518;
+            border-radius: 20px;
+            padding: 8px 16px;
+            font-size: 14px;
+            color: #f5c518;
+            font-weight: 500;
         }
 
         .modalActions {
@@ -516,7 +558,10 @@
         // Configuration
         const TMDB_API_KEY = '462b797169ca3170f8971775670b86ac'; // Your TMDB API key
         const TMDB_BASE_URL = 'https://api.themoviedb.org/3';
-        const SOCKET_SERVER_URL = 'http://192.168.1.99:3001';
+        // Use public socket server for Netlify, fallback to local for testing
+        const SOCKET_SERVER_URL = window.location.hostname === 'localhost' || window.location.hostname.includes('192.168.1.99') 
+            ? 'http://192.168.1.99:3001' 
+            : 'https://dad-magic-socket.herokuapp.com';
 
         // State
         let genres = [];
@@ -591,7 +636,8 @@
                     poster_path: "/q6y0Go1tsGEsmtFryDOJo3dEmqu.jpg",
                     vote_average: 9.3,
                     release_date: "1994-09-22",
-                    overview: "Two imprisoned men bond over a number of years, finding solace and eventual redemption through acts of common decency."
+                    overview: "Two imprisoned men bond over a number of years, finding solace and eventual redemption through acts of common decency.",
+                    actors: ["Tim Robbins", "Morgan Freeman", "Bob Gunton"]
                 },
                 {
                     id: 238,
@@ -599,7 +645,8 @@
                     poster_path: "/3bhkrj58Vtu7enYsRolD1fZdja1.jpg",
                     vote_average: 9.2,
                     release_date: "1972-03-14",
-                    overview: "The aging patriarch of an organized crime dynasty transfers control of his clandestine empire to his reluctant son."
+                    overview: "The aging patriarch of an organized crime dynasty transfers control of his clandestine empire to his reluctant son.",
+                    actors: ["Marlon Brando", "Al Pacino", "James Caan"]
                 },
                 {
                     id: 155,
