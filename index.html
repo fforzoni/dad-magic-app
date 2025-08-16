@@ -421,23 +421,20 @@
             font-size: 18px;
             font-weight: bold;
             color: #f5c518;
-            margin-bottom: 15px;
+            margin-bottom: 10px;
         }
 
         .actorsList {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
+            list-style: none;
+            padding: 0;
+            margin: 0;
         }
 
         .actorItem {
-            background: rgba(245, 197, 24, 0.1);
-            border: 1px solid #f5c518;
-            border-radius: 20px;
-            padding: 8px 16px;
+            color: #ffffff;
             font-size: 14px;
-            color: #f5c518;
-            font-weight: 500;
+            margin-bottom: 5px;
+            padding: 0;
         }
 
         .modalActions {
@@ -898,11 +895,11 @@
                     ${movie.actors && movie.actors.length > 0 ? `
                         <div class="actorsSection">
                             <h3 class="actorsTitle">Top 3 Actors</h3>
-                            <div class="actorsList">
+                            <ul class="actorsList">
                                 ${movie.actors.map(actor => `
-                                    <div class="actorItem">${actor}</div>
+                                    <li class="actorItem">${actor}</li>
                                 `).join('')}
-                            </div>
+                            </ul>
                         </div>
                     ` : ''}
                 </div>
