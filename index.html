@@ -558,7 +558,7 @@
         const TMDB_BASE_URL = 'https://api.themoviedb.org/3';
         // Try local socket server first, fallback to public server for Netlify
                 const SOCKET_SERVER_URL = window.location.hostname === 'localhost' || window.location.hostname.includes('172.20.10.3')
-            ? 'http://172.20.10.3:3001'
+            ? 'http://localhost:3002'
             : 'https://dad-magic-socket-server-production.up.railway.app';
 
         // State

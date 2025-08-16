@@ -155,15 +155,27 @@
         // Socket connection
         // Try local socket server first, fallback to public server for Netlify
                 const socketServerUrl = window.location.hostname === 'localhost' || window.location.hostname.includes('172.20.10.3')
-            ? 'http://172.20.10.3:3001'
+            ? 'http://localhost:3002'
             : 'https://dad-magic-socket-server-production.up.railway.app';
         
         console.log('Connecting to socket server:', socketServerUrl);
-        const socket = io(socketServerUrl);
-        const connectionStatus = document.getElementById('connectionStatus');
-        const statusText = document.getElementById('statusText');
-        const movieDisplay = document.getElementById('movieDisplay');
+        console.log('Socket.IO library loaded:', typeof io);
+        
+        try {
+            const socket = io(socketServerUrl);
+            console.log('Socket object created:', socket);
+            
+            const connectionStatus = document.getElementById('connectionStatus');
+            const statusText = document.getElementById('statusText');
+            const movieDisplay = document.getElementById('movieDisplay');
+            
+            console.log('DOM elements found:', { connectionStatus, statusText, movieDisplay });
 
+        } catch (error) {
+            console.error('Error setting up socket:', error);
+            return;
+        }
+        
         // Connection status handling
         socket.on('connect', () => {
             console.log('Connected to socket server');

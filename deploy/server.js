@@ -7,15 +7,26 @@ const app = express();
 const server = http.createServer(app);
 const io = socketIo(server, {
   cors: {
-    origin: "*",
-    methods: ["GET", "POST"]
-  }
+    origin: ["https://golden-fenglisu-91831d.netlify.app", "http://localhost:3000", "http://localhost:3001", "http://localhost:3002"],
+    methods: ["GET", "POST", "OPTIONS"],
+    credentials: true,
+    allowedHeaders: ["Content-Type", "Authorization"]
+  },
+  transports: ['websocket', 'polling']
 });
 
 const port = process.env.PORT || 3001;
 
 // Enable CORS
-app.use(cors());
+app.use(cors({
+  origin: ["https://golden-fenglisu-91831d.netlify.app", "http://localhost:3000", "http://localhost:3001", "http://localhost:3002"],
+  credentials: true,
+  methods: ["GET", "POST", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"]
+}));
+
+// Handle preflight requests
+app.options('*', cors());
 
 console.log('=== RAILWAY SERVER STARTING ===');
 console.log('Port:', port);
