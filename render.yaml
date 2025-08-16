@@ -3,8 +3,8 @@ services:
     name: dad-magic-socket-server
     env: node
     plan: free
-    buildCommand: cd server && npm install
-    startCommand: cd server && npm run start:minimal
+    buildCommand: cd server && cp package-basic.json package.json && npm install
+    startCommand: cd server && node basic-server.js
     rootDir: server
     envVars:
       - key: NODE_ENV

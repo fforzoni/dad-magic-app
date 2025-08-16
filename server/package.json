@@ -5,6 +5,7 @@
   "main": "socketServer.js",
   "scripts": {
     "start": "node start.js",
+    "start:basic": "node basic-server.js",
     "start:minimal": "node minimal-server.js",
     "start:direct": "node socketServer.js",
     "dev": "nodemon socketServer.js",

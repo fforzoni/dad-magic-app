@@ -1,0 +1,15 @@
+{
+  "name": "dad-magic-basic-server",
+  "version": "1.0.0",
+  "description": "Basic HTTP server for testing Render deployment",
+  "main": "basic-server.js",
+  "scripts": {
+    "start": "node basic-server.js"
+  },
+  "keywords": ["http-server", "render", "testing"],
+  "author": "Dad Magic App",
+  "license": "MIT",
+  "engines": {
+    "node": ">=16.0.0"
+  }
+}
