@@ -558,10 +558,8 @@
         // Configuration
         const TMDB_API_KEY = '462b797169ca3170f8971775670b86ac'; // Your TMDB API key
         const TMDB_BASE_URL = 'https://api.themoviedb.org/3';
-        // Use public socket server for Netlify, fallback to local for testing
-        const SOCKET_SERVER_URL = window.location.hostname === 'localhost' || window.location.hostname.includes('172.20.10.3') 
-            ? 'http://172.20.10.3:3001' 
-            : 'https://dad-magic-socket.herokuapp.com';
+        // Always use local socket server for now (until we deploy to cloud)
+        const SOCKET_SERVER_URL = 'http://172.20.10.3:3001';
 
         // State
         let genres = [];

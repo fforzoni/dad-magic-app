@@ -153,10 +153,8 @@
 
     <script>
         // Socket connection
-        // Use public socket server for Netlify, fallback to local for testing
-        const socketServerUrl = window.location.hostname === 'localhost' || window.location.hostname.includes('172.20.10.3') 
-            ? 'http://172.20.10.3:3001' 
-            : 'https://dad-magic-socket.herokuapp.com';
+        // Always use local socket server for now (until we deploy to cloud)
+        const socketServerUrl = 'http://172.20.10.3:3001';
         const socket = io(socketServerUrl);
         const connectionStatus = document.getElementById('connectionStatus');
         const statusText = document.getElementById('statusText');
