@@ -573,14 +573,17 @@
         // Initialize the app
         async function initApp() {
             try {
+                // Load sample data first (with actors) for featured movies
+                loadSampleData();
+                
+                // Then load genres and additional movies from TMDB
                 await loadGenresAndMovies();
                 setupSocket();
                 setupSearch();
                 hideLoading();
             } catch (error) {
-                console.error('Error initializing app:', error);
-                // Fallback to sample data if API fails
-                loadSampleData();
+                console.error('Error loading from TMDB:', error);
+                // If TMDB fails, we still have the sample data
                 hideLoading();
             }
         }
@@ -588,12 +591,8 @@
         // Load genres and movies from TMDB API
         async function loadGenresAndMovies() {
             try {
-                // Load featured movies (top rated)
-                const topMovies = await fetch(`${TMDB_BASE_URL}/movie/top_rated?api_key=${TMDB_API_KEY}&language=en-US&page=1`)
-                    .then(res => res.json());
-                
-                featuredMovies = topMovies.results.slice(0, 10);
-                renderFeaturedMovies();
+                // Don't overwrite featured movies - keep the ones with actors from loadSampleData()
+                // Only load genres and genre movies
 
                 // Load genres
                 const genresResponse = await fetch(`${TMDB_BASE_URL}/genre/movie/list?api_key=${TMDB_API_KEY}&language=en-US`);
@@ -869,6 +868,10 @@
         // Show movie modal
         function showMovieModal(movie) {
             selectedMovie = movie;
+            
+            // Debug: Log movie data to console
+            console.log('Movie data:', movie);
+            console.log('Actors:', movie.actors);
             
             const modalBody = document.getElementById('modalBody');
             const posterUrl = movie.poster_path 
