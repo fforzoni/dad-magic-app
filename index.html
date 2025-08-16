@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎬 Dad's Magic Movie App</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            text-align: center;
+        }
+        .header {
+            margin-bottom: 40px;
+        }
+        .header h1 {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        .header p {
+            font-size: 1.3rem;
+            opacity: 0.9;
+            line-height: 1.6;
+        }
+        .views {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin: 40px 0;
+        }
+        .view-card {
+            background: rgba(255,255,255,0.1);
+            border-radius: 20px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .view-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+        }
+        .view-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            color: #ffd700;
+        }
+        .view-card p {
+            margin-bottom: 20px;
+            line-height: 1.6;
+            color: #cccccc;
+        }
+        .btn {
+            display: inline-block;
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            color: white;
+            padding: 15px 30px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        }
+        .local-info {
+            background: rgba(76, 175, 80, 0.2);
+            border: 2px solid #4caf50;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 30px 0;
+        }
+        .local-info h3 {
+            color: #4caf50;
+            margin-bottom: 15px;
+        }
+        .local-info p {
+            margin-bottom: 10px;
+            color: #cccccc;
+        }
+        .emoji {
+            font-size: 4rem;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="emoji">🎬</div>
+            <h1>Dad's Magic Movie App</h1>
+            <p>A real-time movie selection app that connects customers and magicians through live WebSocket communication.</p>
+        </div>
+
+        <div class="views">
+            <div class="view-card">
+                <h3>🎬 Customer View</h3>
+                <p>Browse and select movies from a beautiful collection of posters. Perfect for desktop and mobile browsing.</p>
+                <a href="public/customer.html" class="btn">Open Customer View</a>
+            </div>
+
+            <div class="view-card">
+                <h3>🎩 Magician View</h3>
+                <p>Real-time display of selected movies from customers. Shows live updates via WebSocket connection.</p>
+                <a href="public/magician.html" class="btn">Open Magician View</a>
+            </div>
+        </div>
+
+        <div class="local-info">
+            <h3>🚀 Local Development Setup</h3>
+            <p><strong>Socket Server:</strong> <code>http://localhost:3001</code></p>
+            <p><strong>Customer View:</strong> <code>http://localhost:19006</code> (Expo)</p>
+            <p><strong>Magician View:</strong> <code>http://localhost:3000/magician.html</code></p>
+            <p><strong>Static HTML:</strong> <code>http://localhost:3000</code></p>
+        </div>
+
+        <div class="view-card">
+            <h3>🔧 How to Run Locally</h3>
+            <p>1. Start socket server: <code>cd server && npm start</code></p>
+            <p>2. Start Expo app: <code>npm start</code></p>
+            <p>3. Start static server: <code>cd public && python3 -m http.server 3000</code></p>
+            <p>4. Open customer view and magician view in separate tabs</p>
+        </div>
+    </div>
+</body>
+</html>

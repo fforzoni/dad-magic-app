@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎩 Magician View - Dad's Magic Movie App</title>
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+            color: white;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        .connection-status {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 10px;
+            background: rgba(244, 67, 54, 0.2);
+            border: 2px solid #f44336;
+        }
+        .connection-status.connected {
+            background: rgba(76, 175, 80, 0.2);
+            border-color: #4caf50;
+        }
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 10px;
+            background-color: #f44336;
+        }
+        .connection-status.connected .status-dot {
+            background-color: #4caf50;
+        }
+        .movie-display {
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            padding: 40px;
+            margin: 20px 0;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+            text-align: center;
+            min-height: 400px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        .no-movie {
+            font-size: 4rem;
+            margin-bottom: 20px;
+        }
+        .no-movie-text {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+            color: #cccccc;
+        }
+        .no-movie-subtitle {
+            font-size: 1.1rem;
+            color: #999999;
+            line-height: 1.6;
+        }
+        .movie-poster {
+            max-width: 300px;
+            max-height: 450px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        .movie-title {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #ffffff;
+        }
+        .movie-year {
+            font-size: 1.3rem;
+            color: #cccccc;
+            margin-bottom: 10px;
+        }
+        .movie-rating {
+            font-size: 1.3rem;
+            color: #FFD700;
+        }
+        .instructions {
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            padding: 25px;
+            margin: 20px 0;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        .instructions h3 {
+            color: #ffd700;
+            margin-bottom: 15px;
+        }
+        .instructions p {
+            line-height: 1.6;
+            color: #cccccc;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎩 Magician View</h1>
+            <div class="connection-status" id="connectionStatus">
+                <div class="status-dot"></div>
+                <span id="statusText">Disconnected</span>
+            </div>
+        </div>
+
+        <div class="movie-display" id="movieDisplay">
+            <div class="no-movie">🎬</div>
+            <div class="no-movie-text">Waiting for Movie Selection</div>
+            <div class="no-movie-subtitle">
+                Select any movie on the customer app to see it here live!
+            </div>
+        </div>
+
+        <div class="instructions">
+            <h3>📱 How to Use</h3>
+            <p>1. <strong>Customer View</strong>: Open the customer app on your desktop to browse movies</p>
+            <p>2. <strong>Select a Movie</strong>: Click on any movie poster in the customer view</p>
+            <p>3. <strong>Watch Live</strong>: The selected movie will appear here instantly!</p>
+            <p>4. <strong>Real-time Updates</strong>: Every movie selection is shown in real-time via WebSocket</p>
+        </div>
+    </div>
+
+    <script>
+        // Socket connection
+        const socket = io('http://192.168.1.99:3001');
+        const connectionStatus = document.getElementById('connectionStatus');
+        const statusText = document.getElementById('statusText');
+        const movieDisplay = document.getElementById('movieDisplay');
+
+        // Connection status handling
+        socket.on('connect', () => {
+            console.log('Connected to socket server');
+            connectionStatus.classList.add('connected');
+            statusText.textContent = 'Connected';
+            
+            // Join the default room
+            socket.emit('join-room', { roomId: 'default-room' });
+        });
+
+        socket.on('disconnect', () => {
+            console.log('Disconnected from socket server');
+            connectionStatus.classList.remove('connected');
+            statusText.textContent = 'Disconnected';
+        });
+
+        // Listen for movie selection
+        socket.on('movie-selected', (data) => {
+            console.log('Movie selected:', data.movie);
+            displayMovie(data.movie);
+        });
+
+        // Display movie function
+        function displayMovie(movie) {
+            movieDisplay.innerHTML = `
+                <img src="https://image.tmdb.org/t/p/w500${movie.poster_path}" 
+                     alt="${movie.title}" 
+                     class="movie-poster"
+                     onerror="this.style.display='none'">
+                <div class="movie-title">${movie.title}</div>
+                <div class="movie-year">${new Date(movie.release_date).getFullYear()}</div>
+                <div class="movie-rating">⭐ ${movie.vote_average}/10</div>
+            `;
+        }
+
+        // Error handling
+        socket.on('error', (error) => {
+            console.error('Socket error:', error);
+        });
+
+        // Room join confirmation
+        socket.on('room-joined', (data) => {
+            console.log('Joined room:', data.roomId);
+        });
+    </script>
+</body>
+</html>

@@ -1,42 +1,22 @@
-# 🎬 Dad's Magic App - Dual App System
+# 🎬 Dad's Magic Movie App
 
-A real-time dual-app system featuring a customer-facing movie selection app and a magician-facing display app with instant synchronization.
+A real-time movie selection app that connects customers and magicians through live WebSocket communication.
 
-## ✨ Features
+## 🌟 Features
 
-### 🖥️ Customer App (Desktop)
-- Browse and search movies from TMDB
-- Real-time movie selection
-- Clean, modern UI
-- Genre-based filtering
-- Movie details and ratings
+- **Real-time Communication**: WebSocket-based live updates between customer and magician views
+- **Beautiful UI**: Modern, responsive design with movie posters and smooth animations
+- **Cross-platform**: Works on desktop and mobile devices
+- **Live Updates**: Instant movie selection display on magician view
 
-### 🎩 Magician App (Phone)
-- Real-time display of customer selections
-- Connection status indicator
-- Clean black interface
-- Instant movie poster updates
-- Professional presentation view
+## 🚀 Quick Start
 
-### 🔄 Real-time Communication
-- Socket.IO-based synchronization
-- Instant updates between apps
-- Room-based broadcasting
-- Reliable connection handling
-
-## 🚀 Getting Started
-
-### Prerequisites
-- Node.js (v14 or higher)
-- Expo CLI
-- iOS/Android device or simulator
-
-### Installation
+### Local Development
 
 1. **Clone the repository**
    ```bash
-   git clone [your-repo-url]
-   cd Dad_MagicApp_002
+   git clone https://github.com/fforzoni/dad-magic-app.git
+   cd dad-magic-app
    ```
 
 2. **Install dependencies**
@@ -45,126 +25,112 @@ A real-time dual-app system featuring a customer-facing movie selection app and 
    cd server && npm install
    ```
 
-3. **Start the socket server**
+3. **Start the services**
    ```bash
-   cd server
+   # Terminal 1: Start socket server
+   cd server && npm start
+   
+   # Terminal 2: Start Expo app
    npm start
+   
+   # Terminal 3: Start static HTML server
+   cd public && python3 -m http.server 3000
    ```
 
-4. **Start the Expo app**
-   ```bash
-   npx expo start --lan --web --port 19000
-   ```
+4. **Access the app**
+   - **Customer View**: `http://localhost:19006/` (Expo) or `http://localhost:3000/customer.html`
+   - **Magician View**: `http://localhost:3000/magician.html`
+   - **Socket Server**: `http://localhost:3001`
 
-## 🌐 Access URLs
+### Network Access (for iPhone testing)
 
-- **Customer App (Desktop)**: `http://192.168.1.99:19006`
-- **Magician App (Phone)**: `http://192.168.1.99:19006/Magician`
+- **Customer View**: `http://192.168.1.99:19006/`
+- **Magician View**: `http://192.168.1.99:3000/magician.html`
 - **Socket Server**: `http://192.168.1.99:3001`
 
 ## 📱 How It Works
 
-1. **Customer selects a movie** on the desktop app
-2. **Socket.IO emits** the selection to the server
-3. **Server broadcasts** to all connected clients
-4. **Magician app receives** the update instantly
-5. **Movie poster displays** on the magician screen
+1. **Customer View**: Browse and select movies from a collection of posters
+2. **Real-time Selection**: Selected movies are instantly sent via WebSocket
+3. **Magician View**: Displays the currently selected movie in real-time
+4. **Live Updates**: Every selection is shown immediately on the magician view
 
-## 🏗️ Architecture
+## 🛠️ Tech Stack
 
-```
-Customer App (Desktop) ←→ Socket.IO Server ←→ Magician App (Phone)
-     ↓                           ↓                    ↓
-  React Native              Node.js +           React Native
-  + Expo Web              Socket.IO            + Expo Web
-```
+- **Frontend**: React Native (Expo), HTML/CSS/JavaScript
+- **Backend**: Node.js, Express, Socket.IO
+- **Real-time**: WebSocket communication
+- **Styling**: Modern CSS with gradients and animations
+
+## 🌐 GitHub Pages Setup
+
+To deploy this app on GitHub Pages:
+
+1. **Go to repository settings**: `https://github.com/fforzoni/dad-magic-app/settings`
+2. **Click "Pages"** in the left sidebar
+3. **Source**: Select "Deploy from a branch"
+4. **Branch**: Choose `main` or `master`
+5. **Folder**: Select `/ (root)`
+6. **Click "Save"**
+
+The app will be available at: `https://fforzoni.github.io/dad-magic-app/`
 
 ## 📁 Project Structure
 
 ```
-├── src/
-│   ├── screens/
-│   │   ├── HomeScreen.js          # Customer app main screen
-│   │   ├── MagicianScreen.js      # Magician app screen
-│   │   ├── GenreScreen.js         # Genre selection
-│   │   └── MovieDetailScreen.js   # Movie details
-│   ├── services/
-│   │   ├── socketService.js       # Socket.IO client
-│   │   └── tmdbService.js         # TMDB API integration
-│   └── components/
-│       └── MovieModal.js          # Movie selection modal
-├── server/
-│   ├── socketServer.js            # Socket.IO server
-│   └── package.json
-├── App.js                         # Main app router
-└── package.json
+dad-magic-app/
+├── public/                 # Static HTML files
+│   ├── customer.html      # Customer view interface
+│   ├── magician.html      # Magician view interface
+│   └── index.html         # Landing page
+├── server/                 # Socket server backend
+│   ├── socketServer.js    # WebSocket server
+│   └── package.json       # Server dependencies
+├── src/                    # React Native source code
+│   ├── screens/           # App screens
+│   └── services/          # Socket service
+└── index.html             # GitHub Pages landing page
 ```
 
 ## 🔧 Configuration
 
-### Socket Server
-- Port: 3001
-- Room: `default-room`
-- Events: `select-movie`, `movie-selected`
+- **Socket Server Port**: 3001
+- **Expo Web Port**: 19006
+- **Static Server Port**: 3000
+- **Network IP**: 192.168.1.99 (your local IP)
 
-### TMDB Integration
-- API key required
-- Movie data source
-- Poster image URLs
+## 📱 Testing
 
-## 🎯 Use Cases
+### Desktop Testing
+- Open customer view in one tab
+- Open magician view in another tab
+- Select movies and watch real-time updates
 
-- **Magic Shows**: Audience selects movies, magician sees selections
-- **Interactive Presentations**: Real-time audience participation
-- **Live Events**: Instant feedback and selection display
-- **Educational**: Student choice visualization
+### iPhone Testing
+- Connect iPhone to same WiFi network
+- Access customer view: `http://192.168.1.99:19006/`
+- Access magician view: `http://192.168.1.99:3000/magician.html`
+- Test real-time communication
 
-## 🚨 Troubleshooting
+## 🎯 Current Status
 
-### Common Issues
-1. **Socket connection failed**: Check if server is running on port 3001
-2. **Movies not updating**: Verify socket server is accessible from client IP
-3. **Blank magician screen**: Check browser console for errors
-
-### Debug Commands
-```bash
-# Check socket server status
-lsof -i :3001
-
-# Restart socket server
-pkill -f "socketServer.js" && cd server && npm start
-
-# Clear Expo cache
-npx expo start --clear
-```
-
-## 📝 Version History
-
-- **v1.0.0** (2025-08-15): Working dual-app system with real-time synchronization
-  - Customer app with movie browsing
-  - Magician app with live updates
-  - Socket.IO real-time communication
-  - Clean UI without debug elements
+- ✅ **Socket Server**: Running and functional
+- ✅ **Customer View**: Working with movie posters
+- ✅ **Magician View**: Real-time updates working
+- ✅ **Local Network**: Accessible from iPhone
+- 🚧 **GitHub Pages**: Setup in progress
 
 ## 🤝 Contributing
 
 1. Fork the repository
 2. Create a feature branch
 3. Make your changes
-4. Test thoroughly
-5. Submit a pull request
+4. Submit a pull request
 
 ## 📄 License
 
 This project is licensed under the MIT License.
 
-## 🙏 Acknowledgments
-
-- TMDB for movie data
-- Socket.IO for real-time communication
-- Expo for cross-platform development
-- React Native community
-
 ---
 
-**Status**: ✅ **WORKING VERSION** - Ready for production use!
+**Made with ❤️ for Dad's Magic Movie App**

@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎬 Customer View - Dad's Magic Movie App</title>
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        .connection-status {
+            background: rgba(76, 175, 80, 0.2);
+            border: 2px solid #4caf50;
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            margin: 20px 0;
+        }
+        .connection-status.disconnected {
+            background: rgba(244, 67, 54, 0.2);
+            border-color: #f44336;
+        }
+        .movies-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+        .movie-card {
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            padding: 15px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+            transition: transform 0.2s, box-shadow 0.2s;
+            cursor: pointer;
+        }
+        .movie-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            border-color: #ffd700;
+        }
+        .movie-card.selected {
+            border-color: #4caf50;
+            box-shadow: 0 0 20px rgba(76, 175, 80, 0.5);
+        }
+        .movie-poster {
+            width: 100%;
+            height: 300px;
+            object-fit: cover;
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
+        .movie-title {
+            font-size: 1rem;
+            font-weight: bold;
+            margin-bottom: 8px;
+            line-height: 1.3;
+        }
+        .movie-year {
+            font-size: 0.9rem;
+            color: #cccccc;
+            margin-bottom: 8px;
+        }
+        .movie-rating {
+            font-size: 0.9rem;
+            color: #FFD700;
+        }
+        .instructions {
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            padding: 25px;
+            margin: 20px 0;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        .instructions h3 {
+            color: #ffd700;
+            margin-bottom: 15px;
+        }
+        .instructions p {
+            line-height: 1.6;
+            color: #cccccc;
+        }
+        .selected-movie {
+            background: rgba(76, 175, 80, 0.2);
+            border: 2px solid #4caf50;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .selected-movie h3 {
+            color: #4caf50;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎬 Dad's Magic Movie App</h1>
+            <p>Browse and select movies to send to the magician view in real-time!</p>
+        </div>
+
+        <div class="connection-status" id="connectionStatus">
+            <strong>🔌 Connected to Magician View</strong>
+        </div>
+
+        <div class="selected-movie" id="selectedMovie" style="display: none;">
+            <h3>🎯 Currently Selected Movie</h3>
+            <div id="selectedMovieContent"></div>
+        </div>
+
+        <div class="instructions">
+            <h3>📱 How to Use</h3>
+            <p>1. <strong>Browse Movies</strong>: Look through the movie posters below</p>
+            <p>2. <strong>Select a Movie</strong>: Click on any movie poster to select it</p>
+            <p>3. <strong>Send to Magician</strong>: The selected movie is instantly sent to the magician view</p>
+            <p>4. <strong>Real-time Updates</strong>: The magician will see your selection immediately!</p>
+        </div>
+
+        <div class="movies-grid" id="moviesGrid">
+            <!-- Movies will be loaded here -->
+        </div>
+    </div>
+
+    <script>
+        // Sample movie data (in a real app, this would come from TMDB API)
+        const sampleMovies = [
+            {
+                id: 1,
+                title: "The Shawshank Redemption",
+                release_date: "1994-09-22",
+                vote_average: 9.3,
+                poster_path: "https://image.tmdb.org/t/p/w500/q6y0Go1tsGEsmtFryDOJo3dEmqu.jpg"
+            },
+            {
+                id: 2,
+                title: "The Godfather",
+                release_date: "1972-03-14",
+                vote_average: 9.2,
+                poster_path: "https://image.tmdb.org/t/p/w500/3bhkrj58Vtu7enYsRolD1fZdja1.jpg"
+            },
+            {
+                id: 3,
+                title: "The Dark Knight",
+                release_date: "2008-07-16",
+                vote_average: 9.0,
+                poster_path: "https://image.tmdb.org/t/p/w500/qJ2tW6WMUDux911r6m7haRef0WH.jpg"
+            },
+            {
+                id: 4,
+                title: "Pulp Fiction",
+                release_date: "1994-09-10",
+                vote_average: 8.9,
+                poster_path: "https://image.tmdb.org/t/p/w500/d5iIlFn5s0ImszYzBPb8JPIfbXD.jpg"
+            },
+            {
+                id: 5,
+                title: "Fight Club",
+                release_date: "1999-10-15",
+                vote_average: 8.8,
+                poster_path: "https://image.tmdb.org/t/p/w500/pB8BM7pdSp6B6Ih7QZ4DrQ3PmJK.jpg"
+            },
+            {
+                id: 6,
+                title: "Inception",
+                release_date: "2010-07-16",
+                vote_average: 8.8,
+                poster_path: "https://image.tmdb.org/t/p/w500/9gk7adHYeDvHkCSEqAvQNLV5Uge.jpg"
+            },
+            {
+                id: 7,
+                title: "The Matrix",
+                release_date: "1999-03-30",
+                vote_average: 8.7,
+                poster_path: "https://image.tmdb.org/t/p/w500/f89U3ADr1oiB1s9GkdPOEpXUk5H.jpg"
+            },
+            {
+                id: 8,
+                title: "Goodfellas",
+                release_date: "1990-09-12",
+                vote_average: 8.7,
+                poster_path: "https://image.tmdb.org/t/p/w500/aKuFiU82s5ISJpGZp7YkIr3kCUd.jpg"
+            }
+        ];
+
+        // Socket connection
+        const socket = io('http://192.168.1.99:3001');
+        const connectionStatus = document.getElementById('connectionStatus');
+        const moviesGrid = document.getElementById('moviesGrid');
+        const selectedMovie = document.getElementById('selectedMovie');
+        const selectedMovieContent = document.getElementById('selectedMovieContent');
+
+        // Connection status handling
+        socket.on('connect', () => {
+            console.log('Connected to socket server');
+            connectionStatus.innerHTML = '<strong>✅ Connected to Magician View</strong>';
+            connectionStatus.classList.remove('disconnected');
+            
+            // Join the default room
+            socket.emit('join-room', { roomId: 'default-room' });
+        });
+
+        socket.on('disconnect', () => {
+            console.log('Disconnected from socket server');
+            connectionStatus.innerHTML = '<strong>❌ Disconnected from Magician View</strong>';
+            connectionStatus.classList.add('disconnected');
+        });
+
+        // Room join confirmation
+        socket.on('room-joined', (data) => {
+            console.log('Joined room:', data.roomId);
+        });
+
+        // Load movies
+        function loadMovies() {
+            moviesGrid.innerHTML = '';
+            sampleMovies.forEach(movie => {
+                const movieCard = document.createElement('div');
+                movieCard.className = 'movie-card';
+                movieCard.innerHTML = `
+                    <img src="${movie.poster_path}" 
+                         alt="${movie.title}" 
+                         class="movie-poster"
+                         onerror="this.src='https://via.placeholder.com/200x300/666/fff?text=Movie'">
+                    <div class="movie-title">${movie.title}</div>
+                    <div class="movie-year">${new Date(movie.release_date).getFullYear()}</div>
+                    <div class="movie-rating">⭐ ${movie.vote_average}/10</div>
+                `;
+                
+                movieCard.addEventListener('click', () => selectMovie(movie, movieCard));
+                moviesGrid.appendChild(movieCard);
+            });
+        }
+
+        // Select movie function
+        function selectMovie(movie, movieCard) {
+            // Remove previous selection
+            document.querySelectorAll('.movie-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            
+            // Add selection to clicked card
+            movieCard.classList.add('selected');
+            
+            // Show selected movie info
+            selectedMovieContent.innerHTML = `
+                <img src="${movie.poster_path}" 
+                     alt="${movie.title}" 
+                     style="width: 150px; height: 225px; object-fit: cover; border-radius: 10px; margin-bottom: 15px;">
+                <div style="font-size: 1.2rem; font-weight: bold; margin-bottom: 10px;">${movie.title}</div>
+                <div style="color: #cccccc; margin-bottom: 10px;">${new Date(movie.release_date).getFullYear()}</div>
+                <div style="color: #FFD700;">⭐ ${movie.vote_average}/10</div>
+            `;
+            selectedMovie.style.display = 'block';
+            
+            // Send to magician view via socket
+            socket.emit('select-movie', {
+                roomId: 'default-room',
+                movie: movie,
+                clientId: socket.id
+            });
+            
+            console.log('Movie selected and sent to magician:', movie.title);
+        }
+
+        // Error handling
+        socket.on('error', (error) => {
+            console.error('Socket error:', error);
+        });
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            loadMovies();
+        });
+    </script>
+</body>
+</html>
