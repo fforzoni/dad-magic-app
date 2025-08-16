@@ -15,6 +15,15 @@ const io = socketIo(server, {
 // Enable CORS for all routes
 app.use(cors());
 
+// Root endpoint for health checks
+app.get('/', (req, res) => {
+  res.json({ 
+    message: 'Dad Magic Socket Server is running!',
+    status: 'OK',
+    timestamp: new Date().toISOString()
+  });
+});
+
 // Store active rooms and their clients
 const rooms = new Map();
 
@@ -191,6 +200,11 @@ const PORT = process.env.PORT || 3001;
 server.listen(PORT, () => {
   console.log(`Socket server running on port ${PORT}`);
   console.log(`Server started at: ${new Date().toISOString()}`);
+  console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
+  console.log(`Process ID: ${process.pid}`);
+}).on('error', (err) => {
+  console.error('Failed to start server:', err);
+  process.exit(1);
 });
 
 // Graceful shutdown
