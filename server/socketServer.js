@@ -20,8 +20,15 @@ app.get('/', (req, res) => {
   res.json({ 
     message: 'Dad Magic Socket Server is running!',
     status: 'OK',
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
+    port: process.env.PORT || 3001,
+    environment: process.env.NODE_ENV || 'development'
   });
+});
+
+// Simple ping endpoint for Render health checks
+app.get('/ping', (req, res) => {
+  res.status(200).send('pong');
 });
 
 // Store active rooms and their clients
@@ -197,13 +204,25 @@ app.use((req, res) => {
 
 const PORT = process.env.PORT || 3001;
 
+console.log('Starting socket server...');
+console.log('Environment variables:');
+console.log('- PORT:', process.env.PORT);
+console.log('- NODE_ENV:', process.env.NODE_ENV);
+console.log('Using port:', PORT);
+
 server.listen(PORT, () => {
-  console.log(`Socket server running on port ${PORT}`);
-  console.log(`Server started at: ${new Date().toISOString()}`);
-  console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
-  console.log(`Process ID: ${process.pid}`);
+  console.log('==========================================');
+  console.log(`✅ Socket server started successfully!`);
+  console.log(`🌐 Server running on port: ${PORT}`);
+  console.log(`🕐 Started at: ${new Date().toISOString()}`);
+  console.log(`🔧 Environment: ${process.env.NODE_ENV || 'development'}`);
+  console.log(`🆔 Process ID: ${process.pid}`);
+  console.log(`📡 Socket.IO server ready for connections`);
+  console.log('==========================================');
 }).on('error', (err) => {
-  console.error('Failed to start server:', err);
+  console.error('❌ Failed to start server:', err);
+  console.error('Error details:', err.message);
+  console.error('Error code:', err.code);
   process.exit(1);
 });
 
