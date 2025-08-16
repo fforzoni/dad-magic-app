@@ -1,0 +1,13 @@
+{
+  "name": "socket-server-deploy",
+  "version": "1.0.0",
+  "description": "Socket server deployment package",
+  "main": "server.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": "18.x"
+  }
+}
