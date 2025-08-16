@@ -3,135 +3,324 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🎬 Dad's Magic Movie App</title>
+    <title>🎬 Customer View - Dad's Magic Movie App</title>
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
     <style>
         body {
             margin: 0;
             padding: 20px;
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            background: linear-gradient(135deg, #0f0f0f 0%, #1a1a1a 100%);
             color: white;
             min-height: 100vh;
         }
         .container {
-            max-width: 800px;
+            max-width: 1200px;
             margin: 0 auto;
             text-align: center;
         }
         .header {
-            margin-bottom: 40px;
+            margin-bottom: 30px;
         }
         .header h1 {
-            font-size: 3rem;
-            margin-bottom: 20px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-        }
-        .header p {
-            font-size: 1.3rem;
-            opacity: 0.9;
-            line-height: 1.6;
-        }
-        .views {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 30px;
-            margin: 40px 0;
-        }
-        .view-card {
-            background: rgba(255,255,255,0.1);
-            border-radius: 20px;
-            padding: 30px;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,255,255,0.2);
-            transition: transform 0.3s, box-shadow 0.3s;
-        }
-        .view-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 35px rgba(0,0,0,0.3);
-        }
-        .view-card h3 {
-            font-size: 1.5rem;
-            margin-bottom: 15px;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
             color: #ffd700;
         }
-        .view-card p {
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.8;
             margin-bottom: 20px;
-            line-height: 1.6;
-            color: #cccccc;
         }
-        .btn {
+        .connection-status {
+            background: rgba(76, 175, 80, 0.2);
+            border: 2px solid #4caf50;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 30px;
             display: inline-block;
+        }
+        .selected-movie {
+            background: rgba(255, 193, 7, 0.2);
+            border: 2px solid #ffc107;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 30px;
+            display: none;
+        }
+        .selected-movie h3 {
+            color: #ffc107;
+            margin-bottom: 15px;
+        }
+        .selected-movie-content {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        .selected-movie img {
+            width: 100px;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+        .selected-movie-info h4 {
+            margin: 0 0 10px 0;
+            color: #ffd700;
+        }
+        .selected-movie-info p {
+            margin: 5px 0;
+            opacity: 0.9;
+        }
+        .instructions {
+            background: rgba(33, 150, 243, 0.2);
+            border: 2px solid #2196f3;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 30px;
+            text-align: left;
+        }
+        .instructions h3 {
+            color: #2196f3;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        .instructions p {
+            margin-bottom: 10px;
+            line-height: 1.6;
+        }
+        .movies-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+        .movie-card {
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            padding: 15px;
+            transition: transform 0.3s, box-shadow 0.3s;
+            cursor: pointer;
+            border: 2px solid transparent;
+        }
+        .movie-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+            border-color: #ffd700;
+        }
+        .movie-card img {
+            width: 100%;
+            height: 300px;
+            object-fit: cover;
+            border-radius: 10px;
+            margin-bottom: 10px;
+        }
+        .movie-card h4 {
+            margin: 0;
+            font-size: 1rem;
+            color: #ffd700;
+            line-height: 1.3;
+        }
+        .movie-card p {
+            margin: 5px 0 0 0;
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+        .magician-link {
+            position: fixed;
+            top: 20px;
+            right: 20px;
             background: linear-gradient(45deg, #ff6b6b, #ee5a24);
             color: white;
-            padding: 15px 30px;
+            padding: 10px 20px;
             border-radius: 25px;
             text-decoration: none;
             font-weight: bold;
-            transition: transform 0.2s, box-shadow 0.2s;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            transition: transform 0.2s;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
         }
-        .btn:hover {
+        .magician-link:hover {
             transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
-        }
-        .local-info {
-            background: rgba(76, 175, 80, 0.2);
-            border: 2px solid #4caf50;
-            border-radius: 15px;
-            padding: 25px;
-            margin: 30px 0;
-        }
-        .local-info h3 {
-            color: #4caf50;
-            margin-bottom: 15px;
-        }
-        .local-info p {
-            margin-bottom: 10px;
-            color: #cccccc;
-        }
-        .emoji {
-            font-size: 4rem;
-            margin-bottom: 20px;
         }
     </style>
 </head>
 <body>
+    <a href="magician.html" class="magician-link">🎩 Magician View</a>
+    
     <div class="container">
         <div class="header">
-            <div class="emoji">🎬</div>
-            <h1>Dad's Magic Movie App</h1>
-            <p>A real-time movie selection app that connects customers and magicians through live WebSocket communication.</p>
+            <h1>🎬 Dad's Magic Movie App</h1>
+            <p>Browse and select movies to send to the magician view in real-time!</p>
         </div>
 
-        <div class="views">
-            <div class="view-card">
-                <h3>🎬 Customer View</h3>
-                <p>Browse and select movies from a beautiful collection of posters. Perfect for desktop and mobile browsing.</p>
-                <a href="customer.html" class="btn">Open Customer View</a>
-            </div>
-
-            <div class="view-card">
-                <h3>🎩 Magician View</h3>
-                <p>Real-time display of selected movies from customers. Shows live updates via WebSocket connection.</p>
-                <a href="magician.html" class="btn">Open Magician View</a>
-            </div>
+        <div class="connection-status" id="connectionStatus">
+            <strong>🔌 Connected to Magician View</strong>
         </div>
 
-        <div class="local-info">
-            <h3>🚀 Local Development Setup</h3>
-            <p><strong>Socket Server:</strong> <code>http://localhost:3001</code></p>
-            <p><strong>Customer View:</strong> <code>http://localhost:19006</code> (Expo)</p>
-            <p><strong>Magician View:</strong> <code>http://localhost:3000/magician.html</code></p>
-            <p><strong>Static HTML:</strong> <code>http://localhost:3000</code></p>
+        <div class="selected-movie" id="selectedMovie">
+            <h3>🎯 Currently Selected Movie</h3>
+            <div id="selectedMovieContent"></div>
         </div>
 
-        <div class="view-card">
-            <h3>🔧 How to Run Locally</h3>
-            <p>1. Start socket server: <code>cd server && npm start</code></p>
-            <p>2. Start Expo app: <code>npm start</code></p>
-            <p>3. Start static server: <code>cd public && python3 -m http.server 3000</code></p>
-            <p>4. Open customer view and magician view in separate tabs</p>
+        <div class="instructions">
+            <h3>📱 How to Use</h3>
+            <p>1. <strong>Browse Movies</strong>: Look through the movie posters below</p>
+            <p>2. <strong>Select a Movie</strong>: Click on any movie poster to select it</p>
+            <p>3. <strong>Send to Magician</strong>: The selected movie is instantly sent to the magician view</p>
+            <p>4. <strong>Real-time Updates</strong>: The magician will see your selection immediately!</p>
+        </div>
+
+        <div class="movies-grid" id="moviesGrid">
+            <!-- Movies will be loaded here -->
         </div>
     </div>
+
+    <script>
+        const sampleMovies = [
+            {
+                title: "The Shawshank Redemption",
+                year: "1994",
+                poster: "https://image.tmdb.org/t/p/w500/q6y0Go1tsGEsmtFryDOJo3dEmqu.jpg",
+                rating: "9.3"
+            },
+            {
+                title: "The Godfather",
+                year: "1972",
+                poster: "https://image.tmdb.org/t/p/w500/3bhkrj58Vtu7enYsRolD1fZdja1.jpg",
+                rating: "9.2"
+            },
+            {
+                title: "The Dark Knight",
+                year: "2008",
+                poster: "https://image.tmdb.org/t/p/w500/qJ2tW6WMUDux911r6m7haRef0WH.jpg",
+                rating: "9.0"
+            },
+            {
+                title: "Pulp Fiction",
+                year: "1994",
+                poster: "https://image.tmdb.org/t/p/w500/d5iIlFn5s0ImszYzBPb8JPIfbXD.jpg",
+                rating: "8.9"
+            },
+            {
+                title: "Fight Club",
+                year: "1999",
+                poster: "https://image.tmdb.org/t/p/w500/pB8BM7pdSp6B6Ih7QZ4DrQ3PmJK.jpg",
+                rating: "8.8"
+            },
+            {
+                title: "Forrest Gump",
+                year: "1994",
+                poster: "https://image.tmdb.org/t/p/w500/saHP97rTPS5eLmrLQEcANmKrsFl.jpg",
+                rating: "8.8"
+            },
+            {
+                title: "Inception",
+                year: "2010",
+                poster: "https://image.tmdb.org/t/p/w500/9gk7adHYeDvHkCSEqAvQNLV5Uge.jpg",
+                rating: "8.8"
+            },
+            {
+                title: "The Matrix",
+                year: "1999",
+                poster: "https://image.tmdb.org/t/p/w500/f89U3ADr1oiB1s9GkdPOEpXUk5H.jpg",
+                rating: "8.7"
+            },
+            {
+                title: "Goodfellas",
+                year: "1990",
+                poster: "https://image.tmdb.org/t/p/w500/aKuFiU83sXISXLc5BD7k53mFFSU.jpg",
+                rating: "8.7"
+            },
+            {
+                title: "Interstellar",
+                year: "2014",
+                poster: "https://image.tmdb.org/t/p/w500/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg",
+                rating: "8.6"
+            },
+            {
+                title: "The Silence of the Lambs",
+                year: "1991",
+                poster: "https://image.tmdb.org/t/p/w500/rplLJ2hPcOQmkFhTqUte0MkEaO2.jpg",
+                rating: "8.6"
+            },
+            {
+                title: "Gladiator",
+                year: "2000",
+                poster: "https://image.tmdb.org/t/p/w500/6WBIuCWMmSS2bLu2u6XbVwu7cdn.jpg",
+                rating: "8.5"
+            }
+        ];
+
+        // Connect to socket server
+        const socket = io('http://192.168.1.99:3001');
+
+        socket.on('connect', () => {
+            console.log('Connected to socket server');
+            document.getElementById('connectionStatus').innerHTML = '<strong>🔌 Connected to Magician View</strong>';
+        });
+
+        socket.on('disconnect', () => {
+            console.log('Disconnected from socket server');
+            document.getElementById('connectionStatus').innerHTML = '<strong>❌ Disconnected from Magician View</strong>';
+        });
+
+        function loadMovies() {
+            const grid = document.getElementById('moviesGrid');
+            grid.innerHTML = '';
+
+            sampleMovies.forEach(movie => {
+                const movieCard = document.createElement('div');
+                movieCard.className = 'movie-card';
+                movieCard.onclick = () => selectMovie(movie);
+
+                movieCard.innerHTML = `
+                    <img src="${movie.poster}" alt="${movie.title}" onerror="this.src='https://via.placeholder.com/200x300/333/666?text=Movie'">
+                    <h4>${movie.title}</h4>
+                    <p>${movie.year} • ⭐ ${movie.rating}</p>
+                `;
+
+                grid.appendChild(movieCard);
+            });
+        }
+
+        function selectMovie(movie) {
+            // Send movie selection to socket server
+            socket.emit('movieSelected', {
+                title: movie.title,
+                year: movie.year,
+                poster: movie.poster,
+                rating: movie.rating
+            });
+
+            // Show selected movie
+            const selectedMovieDiv = document.getElementById('selectedMovie');
+            const selectedMovieContent = document.getElementById('selectedMovieContent');
+
+            selectedMovieContent.innerHTML = `
+                <div class="selected-movie-content">
+                    <img src="${movie.poster}" alt="${movie.title}" onerror="this.src='https://via.placeholder.com/100x150/333/666?text=Movie'">
+                    <div class="selected-movie-info">
+                        <h4>${movie.title}</h4>
+                        <p><strong>Year:</strong> ${movie.year}</p>
+                        <p><strong>Rating:</strong> ⭐ ${movie.rating}</p>
+                        <p><strong>Status:</strong> 🚀 Sent to Magician!</p>
+                    </div>
+                </div>
+            `;
+
+            selectedMovieDiv.style.display = 'block';
+
+            // Hide after 5 seconds
+            setTimeout(() => {
+                selectedMovieDiv.style.display = 'none';
+            }, 5000);
+        }
+
+        // Load movies when page loads
+        document.addEventListener('DOMContentLoaded', loadMovies);
+    </script>
 </body>
 </html>
