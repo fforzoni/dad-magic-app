@@ -429,23 +429,7 @@
             box-shadow: 0 12px 35px rgba(245, 197, 24, 0.4);
         }
 
-        /* Connection Status */
-        .connectionStatus {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background: rgba(76, 175, 80, 0.9);
-            color: white;
-            padding: 10px 20px;
-            border-radius: 25px;
-            font-weight: bold;
-            z-index: 1000;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-        }
 
-        .connectionStatus.disconnected {
-            background: rgba(231, 76, 60, 0.9);
-        }
 
         /* Loading */
         .loadingContainer {
@@ -498,7 +482,7 @@
                 <div class="searchSpinner" id="searchSpinner" style="display: none;">⏳</div>
             </div>
             
-            <a href="magician.html" class="magicianLink">🎩 Magician View</a>
+
         </div>
     </header>
 
@@ -549,10 +533,7 @@
         </div>
     </div>
 
-    <!-- Connection Status -->
-    <div class="connectionStatus" id="connectionStatus">
-        🔌 Connected to Magician
-    </div>
+
 
     <script>
         // Configuration
@@ -920,21 +901,11 @@
             return genre ? genre.name : 'Unknown';
         }
 
-        // Setup socket connection
+        // Setup socket connection (silent - no UI indicators)
         function setupSocket() {
             socket = io(SOCKET_SERVER_URL);
-
-            socket.on('connect', () => {
-                console.log('Connected to socket server');
-                document.getElementById('connectionStatus').textContent = '🔌 Connected to Magician';
-                document.getElementById('connectionStatus').classList.remove('disconnected');
-            });
-
-            socket.on('disconnect', () => {
-                console.log('Disconnected from socket server');
-                document.getElementById('connectionStatus').textContent = '❌ Disconnected from Magician';
-                document.getElementById('connectionStatus').classList.add('disconnected');
-            });
+            socket.on('connect', () => console.log('Connected to socket server'));
+            socket.on('disconnect', () => console.log('Disconnected from socket server'));
         }
 
         // Setup search functionality
