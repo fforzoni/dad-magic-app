@@ -140,6 +140,8 @@
         .featuredSection {
             margin-bottom: 30px;
             text-align: center;
+            opacity: 0;
+            transition: opacity 0.5s ease-in;
         }
 
         .featuredHeader {
@@ -788,7 +790,15 @@
                 container.appendChild(movieElement);
             });
 
-            document.getElementById('featuredSection').style.display = 'block';
+            // Show featured section smoothly without popup effect
+            const featuredSection = document.getElementById('featuredSection');
+            featuredSection.style.opacity = '0';
+            featuredSection.style.display = 'block';
+            // Smooth fade-in
+            setTimeout(() => {
+                featuredSection.style.transition = 'opacity 0.5s ease-in';
+                featuredSection.style.opacity = '1';
+            }, 100);
         }
 
         // Render genre sections
