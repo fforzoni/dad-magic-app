@@ -157,6 +157,8 @@
                 const socketServerUrl = window.location.hostname === 'localhost' || window.location.hostname.includes('172.20.10.3')
             ? 'http://172.20.10.3:3001'
             : 'https://dad-magic-socket-server-production.up.railway.app';
+        
+        console.log('Connecting to socket server:', socketServerUrl);
         const socket = io(socketServerUrl);
         const connectionStatus = document.getElementById('connectionStatus');
         const statusText = document.getElementById('statusText');
