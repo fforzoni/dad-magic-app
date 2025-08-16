@@ -598,8 +598,11 @@
                 // Only load genres and genre movies
 
                 // Load genres
+                console.log('Fetching genres from TMDB...');
                 const genresResponse = await fetch(`${TMDB_BASE_URL}/genre/movie/list?api_key=${TMDB_API_KEY}&language=en-US`);
+                console.log('Genres response status:', genresResponse.status);
                 const genresData = await genresResponse.json();
+                console.log('Genres data:', genresData);
                 
                 // Filter and sort genres
                 const priorityGenres = ['Action', 'Comedy', 'Drama', 'Thriller', 'Horror', 'Romance', 'Adventure', 'Sci-Fi', 'Animation', 'Fantasy'];
@@ -758,8 +761,11 @@
                 { id: 10752, name: "War" }
             ];
 
-            // Load your exact priority movies by genre
-            moviesByGenre = {
+            // Merge sample movies with existing TMDB data (if any)
+            const existingMoviesByGenre = { ...moviesByGenre };
+            
+            // Add sample movies to existing data
+            const sampleMoviesByGenre = {
                 28: [ // Action
                     { id: 1771, title: "Captain America: The First Avenger", poster_path: "/vSNxAJTqDqGwnazKNVPUWLt8Xx.jpg", vote_average: 6.9, release_date: "2011-07-22", overview: "Steve Rogers, a rejected military soldier, transforms into Captain America after taking a dose of a 'Super-Soldier serum'. But being Captain America comes at a price as he attempts to take down a war monger and a terrorist organization.", actors: ["Chris Evans", "Hugo Weaving", "Tommy Lee Jones"] },
                     { id: 1366, title: "Rocky", poster_path: "/9Tf3QHd6Bi6BrdqC2RgVLBcvdT.jpg", vote_average: 8.0, release_date: "1976-11-21", overview: "When world heavyweight boxing champion, Apollo Creed, visits a local gym, he finds an unknown fighter, Rocky Balboa, whom he wants to face in an exhibition fight.", actors: ["Sylvester Stallone", "Talia Shire", "Burt Young"] },
@@ -801,6 +807,21 @@
                     { id: 12, title: "Finding Nemo", poster_path: "/7PyJcsBhpt9gEWzXy6Wz4ah6zL8.jpg", vote_average: 8.1, release_date: "2003-05-30", overview: "Nemo, an adventurous young clownfish, is unexpectedly taken from his Great Barrier Reef home to a dentist's office aquarium. It's up to his worrisome father Marlin and a friendly but forgetful fish Dory to bring Nemo home -- meeting vegetarian sharks, surfer dude turtles, hypnotic jellyfish, hungry seagulls, and more.", actors: ["Albert Brooks", "Ellen DeGeneres", "Alexander Gould"] }
                 ]
             };
+
+            // Merge sample movies with TMDB movies
+            for (const [genreId, sampleMovies] of Object.entries(sampleMoviesByGenre)) {
+                if (!moviesByGenre[genreId]) {
+                    moviesByGenre[genreId] = [];
+                }
+                
+                // Add sample movies to the beginning of each genre
+                moviesByGenre[genreId] = [...sampleMovies, ...moviesByGenre[genreId]];
+                
+                // Remove duplicates based on movie ID
+                moviesByGenre[genreId] = moviesByGenre[genreId].filter((movie, index, self) => 
+                    index === self.findIndex(m => m.id === movie.id)
+                );
+            }
 
             renderFeaturedMovies();
             renderGenreSections();
