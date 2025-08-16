@@ -5,6 +5,8 @@
   "main": "socketServer.js",
   "scripts": {
     "start": "node start.js",
+    "start:minimal": "node minimal-server.js",
+    "start:direct": "node socketServer.js",
     "dev": "nodemon socketServer.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
