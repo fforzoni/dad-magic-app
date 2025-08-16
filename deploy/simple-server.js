@@ -3,6 +3,7 @@ const http = require('http');
 const socketIo = require('socket.io');
 const cors = require('cors');
 
+// Railway deployment - simplified server for better compatibility
 const app = express();
 const server = http.createServer(app);
 
