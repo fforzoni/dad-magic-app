@@ -590,6 +590,10 @@
         // Load genres and movies from TMDB API
         async function loadGenresAndMovies() {
             try {
+                console.log('Loading genres and movies from TMDB API...');
+                console.log('TMDB API Key:', TMDB_API_KEY);
+                console.log('TMDB Base URL:', TMDB_BASE_URL);
+                
                 // Don't overwrite featured movies - keep the ones with actors from loadSampleData()
                 // Only load genres and genre movies
 
@@ -609,13 +613,27 @@
                     return aPriority - bPriority;
                 });
 
-                // Load movies for each genre, but preserve existing movies with actors
+                // Load movies for each genre from TMDB API
                 for (const genre of genres) {
-                    // Only load from TMDB if we don't already have movies for this genre
-                    if (!moviesByGenre[genre.id] || moviesByGenre[genre.id].length === 0) {
+                    try {
                         const moviesResponse = await fetch(`${TMDB_BASE_URL}/discover/movie?api_key=${TMDB_API_KEY}&language=en-US&sort_by=popularity.desc&include_adult=false&include_video=false&page=1&with_genres=${genre.id}`);
                         const moviesData = await moviesResponse.json();
-                        moviesByGenre[genre.id] = moviesData.results.slice(0, 20);
+                        
+                        // Merge TMDB movies with existing sample data (if any)
+                        const existingMovies = moviesByGenre[genre.id] || [];
+                        const tmdbMovies = moviesData.results.slice(0, 20);
+                        
+                        // Combine and remove duplicates based on movie ID
+                        const allMovies = [...existingMovies, ...tmdbMovies];
+                        const uniqueMovies = allMovies.filter((movie, index, self) => 
+                            index === self.findIndex(m => m.id === movie.id)
+                        );
+                        
+                        moviesByGenre[genre.id] = uniqueMovies;
+                        console.log(`Loaded ${tmdbMovies.length} TMDB movies for ${genre.name}`);
+                    } catch (error) {
+                        console.error(`Error loading movies for ${genre.name}:`, error);
+                        // Keep existing movies if TMDB fails
                     }
                 }
 
