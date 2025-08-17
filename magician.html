@@ -84,6 +84,15 @@
             flex: 1;
             text-align: left;
         }
+
+        .movie-title-top {
+            font-size: 2.5rem;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 30px;
+            color: #ffffff;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
         .no-movie {
             font-size: 4rem;
             margin-bottom: 20px;
@@ -244,8 +253,9 @@
             }
 
             /* Ensure text is readable on small screens */
-            .movie-title {
-                font-size: 1.5rem;
+            .movie-title-top {
+                font-size: 1.8rem;
+                margin-bottom: 20px;
             }
 
             .movie-year {
@@ -433,6 +443,7 @@
         function displayMovie(movie) {
             log(`🎬 Displaying movie: ${movie.title}`);
             movieDisplay.innerHTML = `
+                <div class="movie-title-top">${movie.title}</div>
                 <div class="movie-content">
                     <div class="movie-poster-container">
                         <img src="https://image.tmdb.org/t/p/w500${movie.poster_path}" 
@@ -441,7 +452,6 @@
                              onerror="this.style.display='none'">
                     </div>
                     <div class="movie-info-container">
-                        <div class="movie-title">${movie.title}</div>
                         <div class="movie-year">${new Date(movie.release_date).getFullYear()}</div>
                         <div class="movie-rating">⭐ ${movie.vote_average}/10</div>
                         ${movie.actors && movie.actors.length > 0 ? `
