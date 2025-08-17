@@ -96,6 +96,7 @@
             right: 20px;
             top: 50%;
             transform: translateY(-50%);
+            display: none;
         }
 
 
@@ -105,11 +106,12 @@
         /* Search Dropdown */
         .searchDropdownOverlay {
             position: absolute;
-            top: 120px;
+            top: 100%;
             left: 0;
             right: 0;
             z-index: 999999;
             pointer-events: none;
+            margin-top: 5px;
         }
 
         .searchDropdown {
@@ -497,7 +499,7 @@
             
             <div class="searchContainer">
                 <input type="text" class="searchInput" placeholder="Search movies..." id="searchInput">
-                <div class="searchSpinner" id="searchSpinner" style="display: none;">⏳</div>
+                <div class="searchSpinner" id="searchSpinner" style="display: none;"></div>
             </div>
             
 
