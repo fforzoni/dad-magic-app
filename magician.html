@@ -63,12 +63,26 @@
             margin: 15px 0;
             backdrop-filter: blur(10px);
             border: 1px solid rgba(255,255,255,0.2);
-            text-align: center;
             min-height: 450px;
             display: flex;
-            flex-direction: column;
             justify-content: center;
             align-items: center;
+        }
+
+        .movie-content {
+            display: flex;
+            align-items: center;
+            gap: 40px;
+            max-width: 800px;
+        }
+
+        .movie-poster-container {
+            flex-shrink: 0;
+        }
+
+        .movie-info-container {
+            flex: 1;
+            text-align: left;
         }
         .no-movie {
             font-size: 4rem;
@@ -88,7 +102,6 @@
             max-width: 300px;
             max-height: 450px;
             border-radius: 15px;
-            margin-bottom: 20px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
         .movie-title {
@@ -110,7 +123,7 @@
 
         .actors-section {
             margin-top: 15px;
-            text-align: center;
+            text-align: left;
         }
 
         .actors-title {
@@ -145,6 +158,28 @@
         }
         .test-button:hover {
             background: #0056b3;
+        }
+
+        /* Responsive design for mobile */
+        @media (max-width: 768px) {
+            .movie-content {
+                flex-direction: column;
+                gap: 20px;
+                text-align: center;
+            }
+
+            .movie-info-container {
+                text-align: center;
+            }
+
+            .actors-section {
+                text-align: center;
+            }
+
+            .movie-poster {
+                max-width: 250px;
+                max-height: 375px;
+            }
         }
     </style>
 </head>
@@ -311,23 +346,29 @@
         function displayMovie(movie) {
             log(`🎬 Displaying movie: ${movie.title}`);
             movieDisplay.innerHTML = `
-                <img src="https://image.tmdb.org/t/p/w500${movie.poster_path}" 
-                     alt="${movie.title}" 
-                     class="movie-poster"
-                     onerror="this.style.display='none'">
-                <div class="movie-title">${movie.title}</div>
-                <div class="movie-year">${new Date(movie.release_date).getFullYear()}</div>
-                <div class="movie-rating">⭐ ${movie.vote_average}/10</div>
-                ${movie.actors && movie.actors.length > 0 ? `
-                    <div class="actors-section">
-                        <h3 class="actors-title">Starring</h3>
-                        <ul class="actors-list">
-                            ${movie.actors.map(actor => `
-                                <li class="actor-item">${actor}</li>
-                            `).join('')}
-                        </ul>
+                <div class="movie-content">
+                    <div class="movie-poster-container">
+                        <img src="https://image.tmdb.org/t/p/w500${movie.poster_path}" 
+                             alt="${movie.title}" 
+                             class="movie-poster"
+                             onerror="this.style.display='none'">
                     </div>
-                ` : ''}
+                    <div class="movie-info-container">
+                        <div class="movie-title">${movie.title}</div>
+                        <div class="movie-year">${new Date(movie.release_date).getFullYear()}</div>
+                        <div class="movie-rating">⭐ ${movie.vote_average}/10</div>
+                        ${movie.actors && movie.actors.length > 0 ? `
+                            <div class="actors-section">
+                                <h3 class="actors-title">Starring</h3>
+                                <ul class="actors-list">
+                                    ${movie.actors.map(actor => `
+                                        <li class="actor-item">${actor}</li>
+                                    `).join('')}
+                                </ul>
+                            </div>
+                        ` : ''}
+                    </div>
+                </div>
             `;
         }
 
