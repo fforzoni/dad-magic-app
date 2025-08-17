@@ -93,11 +93,7 @@
             margin-bottom: 10px;
             color: #cccccc;
         }
-        .no-movie-subtitle {
-            font-size: 1.1rem;
-            color: #999999;
-            line-height: 1.6;
-        }
+
         .movie-poster {
             max-width: 300px;
             max-height: 450px;
@@ -160,6 +156,40 @@
             background: #0056b3;
         }
 
+        .instructions-section {
+            background: rgba(255,255,255,0.05);
+            border-radius: 15px;
+            padding: 25px;
+            margin: 20px 0;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
+            text-align: center;
+        }
+
+        .instructions-title {
+            font-size: 1.3rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #f5c518;
+        }
+
+        .instructions-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .instructions-list li {
+            color: #cccccc;
+            font-size: 1rem;
+            margin-bottom: 8px;
+            line-height: 1.5;
+        }
+
+        .instructions-list strong {
+            color: #ffffff;
+        }
+
         /* Responsive design for mobile */
         @media (max-width: 768px) {
             .movie-content {
@@ -200,12 +230,16 @@
         <div class="movie-display" id="movieDisplay">
             <div class="no-movie">🎬</div>
             <div class="no-movie-text">No Movie Selected</div>
-            <div class="no-movie-subtitle">
-                <p>1. <strong>Customer selects a movie</strong> from the main app</p>
-                <p>2. <strong>Real-time sync</strong> via WebSocket connection</p>
-                <p>3. <strong>Watch Live</strong>: The selected movie will appear here instantly!</p>
-                <p>4. <strong>Real-time Updates</strong>: Every movie selection is shown in real-time via WebSocket</p>
-            </div>
+        </div>
+
+        <div class="instructions-section">
+            <div class="instructions-title">🎭 How It Works</div>
+            <ul class="instructions-list">
+                <li>1. <strong>Customer selects a movie</strong> from the main app</li>
+                <li>2. <strong>Real-time sync</strong> via WebSocket connection</li>
+                <li>3. <strong>Watch Live</strong>: The selected movie will appear here instantly!</li>
+                <li>4. <strong>Real-time Updates</strong>: Every movie selection is shown in real-time via WebSocket</li>
+            </ul>
         </div>
     </div>
 
