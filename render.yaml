@@ -3,9 +3,9 @@ services:
     name: dad-magic-socket-server
     env: node
     plan: free
-    buildCommand: npm install
-    startCommand: node deploy/simple-server.js
-    rootDir: deploy
+    buildCommand: cd render-deploy && npm install
+    startCommand: cd render-deploy && npm start
+    rootDir: .
     envVars:
       - key: NODE_ENV
         value: production

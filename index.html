@@ -556,10 +556,10 @@
         // Configuration
         const TMDB_API_KEY = '462b797169ca3170f8971775670b86ac'; // Your TMDB API key
         const TMDB_BASE_URL = 'https://api.themoviedb.org/3';
-        // Socket server URL - use local for development, Railway for live sites
+        // Socket server URL - use local for development, Render for live sites
         const SOCKET_SERVER_URL = window.location.hostname === 'localhost' || window.location.hostname.includes('172.20.10.3') || window.location.protocol === 'file:'
             ? 'http://localhost:3002'
-            : 'https://dad-magic-socket-server-production.up.railway.app';
+            : 'https://dad-magic-socket-server.onrender.com';
 
         // State
         let genres = [];

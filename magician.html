@@ -163,10 +163,10 @@
 
     <script>
         // Simple and direct socket connection
-        // Socket server URL - use local for development, Railway for live sites
+        // Socket server URL - use local for development, Render for live sites
         const socketServerUrl = window.location.hostname === 'localhost' || window.location.hostname.includes('172.20.10.3') || window.location.protocol === 'file:'
             ? 'http://localhost:3002'
-            : 'https://dad-magic-socket-server-production.up.railway.app';
+            : 'https://dad-magic-socket-server.onrender.com';
         let socket = null;
         let connectionAttempts = 0;
         const maxAttempts = 3;
