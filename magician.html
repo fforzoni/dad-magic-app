@@ -20,27 +20,27 @@
         }
         .header {
             text-align: center;
-            margin-bottom: 40px;
+            margin-bottom: 25px;
             background: rgba(255,255,255,0.1);
-            border-radius: 15px;
-            padding: 30px;
+            border-radius: 12px;
+            padding: 20px;
             backdrop-filter: blur(10px);
             border: 1px solid rgba(255,255,255,0.2);
         }
         .header h1 {
-            font-size: 2.5rem;
-            margin-bottom: 10px;
+            font-size: 1.8rem;
+            margin-bottom: 8px;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
         }
         .connection-status {
             display: flex;
             align-items: center;
             justify-content: center;
-            margin: 20px 0;
-            padding: 15px;
-            border-radius: 10px;
+            margin: 15px 0;
+            padding: 10px 15px;
+            border-radius: 8px;
             background: rgba(244, 67, 54, 0.2);
-            border: 2px solid #f44336;
+            border: 1px solid #f44336;
         }
         .connection-status.connected {
             background: rgba(76, 175, 80, 0.2);
@@ -59,12 +59,12 @@
         .movie-display {
             background: rgba(255,255,255,0.1);
             border-radius: 15px;
-            padding: 40px;
-            margin: 20px 0;
+            padding: 30px;
+            margin: 15px 0;
             backdrop-filter: blur(10px);
             border: 1px solid rgba(255,255,255,0.2);
             text-align: center;
-            min-height: 400px;
+            min-height: 450px;
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -106,25 +106,16 @@
             font-size: 1.1rem;
             color: #ffd700;
         }
-        .debug-info {
-            background: rgba(0,0,0,0.3);
-            border-radius: 10px;
-            padding: 20px;
-            margin: 20px 0;
-            font-family: monospace;
-            font-size: 0.9rem;
-            max-height: 200px;
-            overflow-y: auto;
-        }
+
         .test-button {
             background: #007bff;
             color: white;
             border: none;
-            padding: 10px 20px;
-            border-radius: 5px;
+            padding: 6px 12px;
+            border-radius: 4px;
             cursor: pointer;
-            margin: 10px;
-            font-size: 1rem;
+            margin: 5px;
+            font-size: 0.8rem;
         }
         .test-button:hover {
             background: #0056b3;
@@ -139,15 +130,11 @@
                 <div class="status-dot"></div>
                 <span id="statusText">Disconnected</span>
             </div>
-            <button id="testConnection" class="test-button">Test Connection</button>
-            <button id="forceConnect" class="test-button">Force Connect</button>
-            <button id="clearLogs" class="test-button">Clear Logs</button>
+            <button id="testConnection" class="test-button">Test</button>
+            <button id="forceConnect" class="test-button">Connect</button>
         </div>
 
-        <div class="debug-info" id="debugInfo">
-            <div>=== DEBUG INFO ===</div>
-            <div>Waiting for connection...</div>
-        </div>
+
 
         <div class="movie-display" id="movieDisplay">
             <div class="no-movie">🎬</div>
@@ -175,25 +162,13 @@
         const connectionStatus = document.getElementById('connectionStatus');
         const statusText = document.getElementById('statusText');
         const movieDisplay = document.getElementById('movieDisplay');
-        const debugInfo = document.getElementById('debugInfo');
         const testConnectionBtn = document.getElementById('testConnection');
         const forceConnectBtn = document.getElementById('forceConnect');
-        const clearLogsBtn = document.getElementById('clearLogs');
 
-        // Debug logging
+        // Simple logging to console only
         function log(message) {
-            const timestamp = new Date().toLocaleTimeString();
-            const logEntry = document.createElement('div');
-            logEntry.textContent = `[${timestamp}] ${message}`;
-            debugInfo.appendChild(logEntry);
-            debugInfo.scrollTop = debugInfo.scrollHeight;
             console.log(message);
         }
-
-        // Clear logs
-        clearLogsBtn.addEventListener('click', () => {
-            debugInfo.innerHTML = '<div>=== DEBUG INFO ===</div>';
-        });
 
         // Update connection status
         function updateStatus(connected, message) {
