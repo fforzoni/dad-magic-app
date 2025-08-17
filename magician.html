@@ -105,6 +105,32 @@
         .movie-rating {
             font-size: 1.1rem;
             color: #ffd700;
+            margin-bottom: 20px;
+        }
+
+        .actors-section {
+            margin-top: 15px;
+            text-align: center;
+        }
+
+        .actors-title {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #f5c518;
+            margin-bottom: 10px;
+        }
+
+        .actors-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .actor-item {
+            color: #ffffff;
+            font-size: 1rem;
+            margin-bottom: 5px;
+            padding: 0;
         }
 
         .test-button {
@@ -292,6 +318,16 @@
                 <div class="movie-title">${movie.title}</div>
                 <div class="movie-year">${new Date(movie.release_date).getFullYear()}</div>
                 <div class="movie-rating">⭐ ${movie.vote_average}/10</div>
+                ${movie.actors && movie.actors.length > 0 ? `
+                    <div class="actors-section">
+                        <h3 class="actors-title">Starring</h3>
+                        <ul class="actors-list">
+                            ${movie.actors.map(actor => `
+                                <li class="actor-item">${actor}</li>
+                            `).join('')}
+                        </ul>
+                    </div>
+                ` : ''}
             `;
         }
 

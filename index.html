@@ -413,29 +413,7 @@
             color: #ccc;
         }
 
-        .actorsSection {
-            margin-bottom: 20px;
-        }
 
-        .actorsTitle {
-            font-size: 18px;
-            font-weight: bold;
-            color: #f5c518;
-            margin-bottom: 10px;
-        }
-
-        .actorsList {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-
-        .actorItem {
-            color: #ffffff;
-            font-size: 14px;
-            margin-bottom: 5px;
-            padding: 0;
-        }
 
         .modalActions {
             text-align: center;
@@ -1026,16 +1004,7 @@
                             <p class="overviewText">${movie.overview}</p>
                         </div>
                     ` : ''}
-                    ${movie.actors && movie.actors.length > 0 ? `
-                        <div class="actorsSection">
-                            <h3 class="actorsTitle">Starring</h3>
-                            <ul class="actorsList">
-                                ${movie.actors.map(actor => `
-                                    <li class="actorItem">${actor}</li>
-                                `).join('')}
-                            </ul>
-                        </div>
-                    ` : ''}
+
                 </div>
             `;
 
