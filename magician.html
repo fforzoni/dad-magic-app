@@ -203,10 +203,11 @@
         @media (max-width: 768px) {
             .movie-content {
                 flex-direction: row;
-                gap: 20px;
+                gap: 15px;
                 align-items: flex-start;
                 flex-wrap: wrap;
                 justify-content: center;
+                max-width: 100%;
             }
 
             .movie-poster-container {
@@ -215,7 +216,7 @@
 
             .movie-info-container {
                 flex: 1;
-                min-width: 200px;
+                min-width: 180px;
                 text-align: left;
             }
 
@@ -224,18 +225,19 @@
             }
 
             .movie-poster {
-                max-width: 200px;
-                max-height: 300px;
+                max-width: 180px;
+                max-height: 270px;
             }
 
             .movie-display {
-                margin-bottom: 30px;
-                padding: 20px;
+                margin-bottom: 20px;
+                padding: 15px;
+                align-items: stretch;
             }
 
             .instructions-section {
-                margin-top: 40px;
-                padding: 20px;
+                margin-top: 30px;
+                padding: 15px;
             }
 
             .container {
@@ -244,34 +246,26 @@
                 min-height: 100vh;
             }
 
-            .movie-display {
-                flex: 1;
-                display: flex;
-                flex-direction: column;
-                justify-content: center;
-                align-items: center;
-            }
-
             /* Ensure text is readable on small screens */
             .movie-title-top {
-                font-size: 1.8rem;
-                margin-bottom: 20px;
+                font-size: 1.6rem;
+                margin-bottom: 15px;
             }
 
             .movie-year {
-                font-size: 1rem;
+                font-size: 0.9rem;
             }
 
             .movie-rating {
-                font-size: 1rem;
+                font-size: 0.9rem;
             }
 
             .actors-title {
-                font-size: 1rem;
+                font-size: 0.9rem;
             }
 
             .actor-item {
-                font-size: 0.9rem;
+                font-size: 0.8rem;
             }
         }
     </style>
