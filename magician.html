@@ -98,29 +98,36 @@
             color: #ffffff;
         }
         .movie-year {
-            font-size: 1.3rem;
+            font-size: 1.2rem;
             color: #cccccc;
             margin-bottom: 10px;
         }
         .movie-rating {
-            font-size: 1.3rem;
-            color: #FFD700;
-        }
-        .instructions {
-            background: rgba(255,255,255,0.1);
-            border-radius: 15px;
-            padding: 25px;
-            margin: 20px 0;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,255,255,0.2);
-        }
-        .instructions h3 {
+            font-size: 1.1rem;
             color: #ffd700;
-            margin-bottom: 15px;
         }
-        .instructions p {
-            line-height: 1.6;
-            color: #cccccc;
+        .debug-info {
+            background: rgba(0,0,0,0.3);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            font-family: monospace;
+            font-size: 0.9rem;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .test-button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px;
+            font-size: 1rem;
+        }
+        .test-button:hover {
+            background: #0056b3;
         }
     </style>
 </head>
@@ -132,74 +139,176 @@
                 <div class="status-dot"></div>
                 <span id="statusText">Disconnected</span>
             </div>
+            <button id="testConnection" class="test-button">Test Connection</button>
+            <button id="forceConnect" class="test-button">Force Connect</button>
+            <button id="clearLogs" class="test-button">Clear Logs</button>
+        </div>
+
+        <div class="debug-info" id="debugInfo">
+            <div>=== DEBUG INFO ===</div>
+            <div>Waiting for connection...</div>
         </div>
 
         <div class="movie-display" id="movieDisplay">
             <div class="no-movie">🎬</div>
-            <div class="no-movie-text">Waiting for Movie Selection</div>
+            <div class="no-movie-text">No Movie Selected</div>
             <div class="no-movie-subtitle">
-                Select any movie on the customer app to see it here live!
+                <p>1. <strong>Customer selects a movie</strong> from the main app</p>
+                <p>2. <strong>Real-time sync</strong> via WebSocket connection</p>
+                <p>3. <strong>Watch Live</strong>: The selected movie will appear here instantly!</p>
+                <p>4. <strong>Real-time Updates</strong>: Every movie selection is shown in real-time via WebSocket</p>
             </div>
-        </div>
-
-        <div class="instructions">
-            <h3>📱 How to Use</h3>
-            <p>1. <strong>Customer View</strong>: Open the customer app on your desktop to browse movies</p>
-            <p>2. <strong>Select a Movie</strong>: Click on any movie poster in the customer view</p>
-            <p>3. <strong>Watch Live</strong>: The selected movie will appear here instantly!</p>
-            <p>4. <strong>Real-time Updates</strong>: Every movie selection is shown in real-time via WebSocket</p>
         </div>
     </div>
 
     <script>
-        // Socket connection
-        // Try local socket server first, fallback to public server for Netlify
-                const socketServerUrl = window.location.hostname === 'localhost' || window.location.hostname.includes('172.20.10.3')
+        // Simple and direct socket connection
+        // Socket server URL - use local for development, Railway for live sites
+        const socketServerUrl = window.location.hostname === 'localhost' || window.location.hostname.includes('172.20.10.3') || window.location.protocol === 'file:'
             ? 'http://localhost:3002'
             : 'https://dad-magic-socket-server-production.up.railway.app';
-        
-        console.log('Connecting to socket server:', socketServerUrl);
-        console.log('Socket.IO library loaded:', typeof io);
-        
-        try {
-            const socket = io(socketServerUrl);
-            console.log('Socket object created:', socket);
-            
-            const connectionStatus = document.getElementById('connectionStatus');
-            const statusText = document.getElementById('statusText');
-            const movieDisplay = document.getElementById('movieDisplay');
-            
-            console.log('DOM elements found:', { connectionStatus, statusText, movieDisplay });
+        let socket = null;
+        let connectionAttempts = 0;
+        const maxAttempts = 3;
 
-        } catch (error) {
-            console.error('Error setting up socket:', error);
-            return;
+        // DOM elements
+        const connectionStatus = document.getElementById('connectionStatus');
+        const statusText = document.getElementById('statusText');
+        const movieDisplay = document.getElementById('movieDisplay');
+        const debugInfo = document.getElementById('debugInfo');
+        const testConnectionBtn = document.getElementById('testConnection');
+        const forceConnectBtn = document.getElementById('forceConnect');
+        const clearLogsBtn = document.getElementById('clearLogs');
+
+        // Debug logging
+        function log(message) {
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = document.createElement('div');
+            logEntry.textContent = `[${timestamp}] ${message}`;
+            debugInfo.appendChild(logEntry);
+            debugInfo.scrollTop = debugInfo.scrollHeight;
+            console.log(message);
         }
-        
-        // Connection status handling
-        socket.on('connect', () => {
-            console.log('Connected to socket server');
-            connectionStatus.classList.add('connected');
-            statusText.textContent = 'Connected';
-            
-            // Join the default room
-            socket.emit('join-room', { roomId: 'default-room' });
+
+        // Clear logs
+        clearLogsBtn.addEventListener('click', () => {
+            debugInfo.innerHTML = '<div>=== DEBUG INFO ===</div>';
         });
 
-        socket.on('disconnect', () => {
-            console.log('Disconnected from socket server');
-            connectionStatus.classList.remove('connected');
-            statusText.textContent = 'Disconnected';
+        // Update connection status
+        function updateStatus(connected, message) {
+            if (connected) {
+                connectionStatus.classList.add('connected');
+                statusText.textContent = message || 'Connected';
+                log(`✅ Status updated: ${message || 'Connected'}`);
+            } else {
+                connectionStatus.classList.remove('connected');
+                statusText.textContent = message || 'Disconnected';
+                log(`❌ Status updated: ${message || 'Disconnected'}`);
+            }
+        }
+
+        // Create socket connection
+        function createSocket() {
+            try {
+                log('🔌 Creating socket connection...');
+                log(`📍 Connecting to: ${socketServerUrl}`);
+                
+                socket = io(socketServerUrl, {
+                    transports: ['websocket', 'polling'],
+                    timeout: 10000,
+                    forceNew: true
+                });
+
+                log('📡 Socket object created');
+                log(`🆔 Socket ID: ${socket.id}`);
+                log(`🔗 Socket connected: ${socket.connected}`);
+
+                // Connection events
+                socket.on('connect', () => {
+                    log('🎉 SOCKET CONNECTED!');
+                    log(`🆔 Connected with ID: ${socket.id}`);
+                    updateStatus(true, 'Connected');
+                    connectionAttempts = 0;
+                    
+                    // Join room
+                    socket.emit('join-room', { roomId: 'default-room' });
+                    log('🚪 Joined default room');
+                });
+
+                socket.on('disconnect', () => {
+                    log('💔 SOCKET DISCONNECTED');
+                    updateStatus(false, 'Disconnected');
+                });
+
+                socket.on('connect_error', (error) => {
+                    log(`🚨 CONNECTION ERROR: ${error.message}`);
+                    updateStatus(false, 'Connection Error');
+                });
+
+                socket.on('error', (error) => {
+                    log(`🚨 SOCKET ERROR: ${error.message}`);
+                });
+
+                // Movie selection
+                socket.on('movie-selected', (data) => {
+                    log(`🎬 MOVIE SELECTED: ${data.movie.title}`);
+                    displayMovie(data.movie);
+                });
+
+                // Room confirmation
+                socket.on('room-joined', (data) => {
+                    log(`🚪 ROOM JOINED: ${data.roomId}`);
+                });
+
+                // Check connection after a short delay
+                setTimeout(() => {
+                    if (socket && !socket.connected) {
+                        log('⏰ Connection timeout - socket not connected');
+                        updateStatus(false, 'Connection Timeout');
+                    }
+                }, 2000);
+
+            } catch (error) {
+                log(`💥 ERROR creating socket: ${error.message}`);
+                updateStatus(false, 'Connection Failed');
+            }
+        }
+
+        // Test connection button
+        testConnectionBtn.addEventListener('click', () => {
+            log('🧪 TESTING CONNECTION...');
+            if (socket) {
+                log(`📊 Socket exists: ${!!socket}`);
+                log(`🔗 Socket connected: ${socket.connected}`);
+                log(`🆔 Socket ID: ${socket.id}`);
+                
+                if (socket.connected) {
+                    log('✅ Socket is connected - testing room join');
+                    socket.emit('join-room', { roomId: 'test-room' });
+                } else {
+                    log('❌ Socket is not connected - attempting reconnect');
+                    socket.connect();
+                }
+            } else {
+                log('❌ No socket available - creating new one');
+                createSocket();
+            }
         });
 
-        // Listen for movie selection
-        socket.on('movie-selected', (data) => {
-            console.log('Movie selected:', data.movie);
-            displayMovie(data.movie);
+        // Force connect button
+        forceConnectBtn.addEventListener('click', () => {
+            log('🔄 FORCING NEW CONNECTION...');
+            if (socket) {
+                socket.disconnect();
+                socket = null;
+            }
+            createSocket();
         });
 
         // Display movie function
         function displayMovie(movie) {
+            log(`🎬 Displaying movie: ${movie.title}`);
             movieDisplay.innerHTML = `
                 <img src="https://image.tmdb.org/t/p/w500${movie.poster_path}" 
                      alt="${movie.title}" 
@@ -211,15 +320,13 @@
             `;
         }
 
-        // Error handling
-        socket.on('error', (error) => {
-            console.error('Socket error:', error);
-        });
-
-        // Room join confirmation
-        socket.on('room-joined', (data) => {
-            console.log('Joined room:', data.roomId);
-        });
+        // Initialize
+        log('🚀 Magician site starting...');
+        log(`🌐 Current location: ${window.location.href}`);
+        log(`🔌 Socket.IO loaded: ${typeof io !== 'undefined'}`);
+        
+        // Create initial connection
+        createSocket();
     </script>
 </body>
 </html>

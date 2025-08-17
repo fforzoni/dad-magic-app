@@ -556,8 +556,8 @@
         // Configuration
         const TMDB_API_KEY = '462b797169ca3170f8971775670b86ac'; // Your TMDB API key
         const TMDB_BASE_URL = 'https://api.themoviedb.org/3';
-        // Try local socket server first, fallback to public server for Netlify
-                const SOCKET_SERVER_URL = window.location.hostname === 'localhost' || window.location.hostname.includes('172.20.10.3')
+        // Socket server URL - use local for development, Railway for live sites
+        const SOCKET_SERVER_URL = window.location.hostname === 'localhost' || window.location.hostname.includes('172.20.10.3') || window.location.protocol === 'file:'
             ? 'http://localhost:3002'
             : 'https://dad-magic-socket-server-production.up.railway.app';
 
@@ -590,19 +590,22 @@
         // Load genres and movies from TMDB API
         async function loadGenresAndMovies() {
             try {
-                console.log('Loading genres and movies from TMDB API...');
+                console.log('=== LOADING GENRES AND MOVIES FROM TMDB ===');
                 console.log('TMDB API Key:', TMDB_API_KEY);
                 console.log('TMDB Base URL:', TMDB_BASE_URL);
+                console.log('Current moviesByGenre before TMDB:', Object.keys(moviesByGenre));
                 
-                // Don't overwrite featured movies - keep the ones with actors from loadSampleData()
-                // Only load genres and genre movies
-
-                // Load genres
+                // Load genres first
                 console.log('Fetching genres from TMDB...');
                 const genresResponse = await fetch(`${TMDB_BASE_URL}/genre/movie/list?api_key=${TMDB_API_KEY}&language=en-US`);
                 console.log('Genres response status:', genresResponse.status);
+                
+                if (!genresResponse.ok) {
+                    throw new Error(`Genres API failed: ${genresResponse.status} ${genresResponse.statusText}`);
+                }
+                
                 const genresData = await genresResponse.json();
-                console.log('Genres data:', genresData);
+                console.log('Genres data received:', genresData.genres.length, 'genres');
                 
                 // Filter and sort genres
                 const priorityGenres = ['Action', 'Comedy', 'Drama', 'Thriller', 'Horror', 'Romance', 'Adventure', 'Sci-Fi', 'Animation', 'Fantasy'];
@@ -615,16 +618,39 @@
                     const bPriority = priorityGenres.indexOf(b.name);
                     return aPriority - bPriority;
                 });
+                
+                console.log('Filtered genres:', genres.map(g => g.name));
 
                 // Load movies for each genre from TMDB API
+                let totalTmdbMovies = 0;
                 for (const genre of genres) {
                     try {
+                        console.log(`Loading movies for ${genre.name} (ID: ${genre.id})...`);
                         const moviesResponse = await fetch(`${TMDB_BASE_URL}/discover/movie?api_key=${TMDB_API_KEY}&language=en-US&sort_by=popularity.desc&include_adult=false&include_video=false&page=1&with_genres=${genre.id}`);
-                        const moviesData = await moviesResponse.json();
                         
-                        // Merge TMDB movies with existing sample data (if any)
+                        if (!moviesResponse.ok) {
+                            console.error(`Movies API failed for ${genre.name}: ${moviesResponse.status}`);
+                            continue;
+                        }
+                        
+                        const moviesData = await moviesResponse.json();
+                        console.log(`${genre.name}: TMDB returned ${moviesData.results.length} movies`);
+                        
+                        // Get existing movies for this genre
                         const existingMovies = moviesByGenre[genre.id] || [];
-                        const tmdbMovies = moviesData.results.slice(0, 20);
+                        console.log(`${genre.name}: Existing movies: ${existingMovies.length}`);
+                        
+                        // Process TMDB movies and add actors data
+                        const tmdbMovies = moviesData.results
+                            .slice(0, 20)
+                            .filter(movie => movie.poster_path && movie.poster_path !== 'null' && movie.poster_path.trim() !== '')
+                            .map(movie => ({
+                                ...movie,
+                                // Add placeholder actors if none exist
+                                actors: movie.actors || ["Actor 1", "Actor 2", "Actor 3"]
+                            }));
+                        
+                        console.log(`${genre.name}: Filtered to ${tmdbMovies.length} movies with valid posters`);
                         
                         // Combine and remove duplicates based on movie ID
                         const allMovies = [...existingMovies, ...tmdbMovies];
@@ -633,22 +659,52 @@
                         );
                         
                         moviesByGenre[genre.id] = uniqueMovies;
-                        console.log(`Loaded ${tmdbMovies.length} TMDB movies for ${genre.name}`);
+                        totalTmdbMovies += tmdbMovies.length;
+                        console.log(`${genre.name}: Final count: ${uniqueMovies.length} movies (${tmdbMovies.length} new from TMDB)`);
+                        
                     } catch (error) {
                         console.error(`Error loading movies for ${genre.name}:`, error);
                         // Keep existing movies if TMDB fails
                     }
                 }
 
+                console.log(`=== TMDB LOADING COMPLETE ===`);
+                console.log(`Total TMDB movies loaded: ${totalTmdbMovies}`);
+                console.log(`Final moviesByGenre:`, Object.keys(moviesByGenre).map(key => `${key}: ${moviesByGenre[key].length} movies`));
+                
+                // Log poster statistics
+                let totalMovies = 0;
+                let moviesWithPosters = 0;
+                Object.values(moviesByGenre).forEach(movies => {
+                    movies.forEach(movie => {
+                        totalMovies++;
+                        if (movie.poster_path && movie.poster_path !== 'null' && movie.poster_path.trim() !== '') {
+                            moviesWithPosters++;
+                        }
+                    });
+                });
+                console.log(`=== POSTER STATISTICS ===`);
+                console.log(`Total movies: ${totalMovies}`);
+                console.log(`Movies with posters: ${moviesWithPosters}`);
+                console.log(`Movies without posters: ${totalMovies - moviesWithPosters}`);
+                console.log(`Poster coverage: ${((moviesWithPosters / totalMovies) * 100).toFixed(1)}%`);
+                
                 renderGenreSections();
             } catch (error) {
-                console.error('Error loading from TMDB:', error);
-                throw error;
+                console.error('=== ERROR LOADING FROM TMDB ===', error);
+                console.error('Error details:', error.message);
+                console.error('Error stack:', error.stack);
+                // Don't throw error, just log it and continue with sample data
+                console.log('Continuing with sample data only...');
             }
         }
 
+
+
         // Load your exact priority movies from your backed-up app
         function loadSampleData() {
+            console.log('=== LOADING SAMPLE DATA ===');
+            
             // Featured Movies - Top 10 Highest-Rated Films of All Time
             featuredMovies = [
                 {
@@ -681,7 +737,7 @@
                 {
                     id: 680,
                     title: "Pulp Fiction",
-                    poster_path: "/d5iIlFn5s0ImszYzBPb8JPIfbXD.jpg",
+                    poster_path: "/vQWk5YBFWF4bZaofAbv0tShwBvQ.jpg",
                     vote_average: 8.9,
                     release_date: "1994-10-14",
                     overview: "The lives of two mob hitmen, a boxer, a gangster and his wife, and a pair of diner bandits intertwine in four tales of violence and redemption.",
@@ -699,7 +755,7 @@
                 {
                     id: 27205,
                     title: "Inception",
-                    poster_path: "/9gk7adHYeDvHkCSEqAvQNLV5Uge.jpg",
+                    poster_path: "/ljsZTbVsrQSqZgWeep2B1QiDKuh.jpg",
                     vote_average: 8.8,
                     release_date: "2010-07-15",
                     overview: "A thief who steals corporate secrets through the use of dream-sharing technology is given the inverse task of planting an idea into the mind of a C.E.O.",
@@ -717,7 +773,7 @@
                 {
                     id: 769,
                     title: "Goodfellas",
-                    poster_path: "/aKuFiU83sXISXLc5BD7k53mFFSU.jpg",
+                    poster_path: "/aKuFiU82s5ISJpGZp7YkIr3kCUd.jpg",
                     vote_average: 8.7,
                     release_date: "1990-09-12",
                     overview: "The story of Henry Hill and his life in the mob, covering his relationship with his wife Karen Hill and his mob partners Jimmy Conway and Tommy DeVito.",
@@ -726,7 +782,7 @@
                 {
                     id: 98,
                     title: "Gladiator",
-                    poster_path: "/6WBIuCWMmSS2bLu2u6XbVwu7cdn.jpg",
+                    poster_path: "/bk6nx2rGNdlKtBsB9XcrclVKItv.jpg",
                     vote_average: 8.5,
                     release_date: "2000-05-01",
                     overview: "A former Roman General sets out to exact vengeance against the corrupt emperor who murdered his family and sent him into slavery.",
@@ -767,52 +823,55 @@
             // Add sample movies to existing data
             const sampleMoviesByGenre = {
                 28: [ // Action
-                    { id: 1771, title: "Captain America: The First Avenger", poster_path: "/vSNxAJTqDqGwnazKNVPUWLt8Xx.jpg", vote_average: 6.9, release_date: "2011-07-22", overview: "Steve Rogers, a rejected military soldier, transforms into Captain America after taking a dose of a 'Super-Soldier serum'. But being Captain America comes at a price as he attempts to take down a war monger and a terrorist organization.", actors: ["Chris Evans", "Hugo Weaving", "Tommy Lee Jones"] },
-                    { id: 1366, title: "Rocky", poster_path: "/9Tf3QHd6Bi6BrdqC2RgVLBcvdT.jpg", vote_average: 8.0, release_date: "1976-11-21", overview: "When world heavyweight boxing champion, Apollo Creed, visits a local gym, he finds an unknown fighter, Rocky Balboa, whom he wants to face in an exhibition fight.", actors: ["Sylvester Stallone", "Talia Shire", "Burt Young"] },
-                    { id: 98, title: "Gladiator", poster_path: "/6WBIuCWMmSS2bLu2u6XbVwu7cdn.jpg", vote_average: 8.5, release_date: "2000-05-01", overview: "A former Roman General sets out to exact vengeance against the corrupt emperor who murdered his family and sent him into slavery.", actors: ["Russell Crowe", "Joaquin Phoenix", "Connie Nielsen"] },
-                    { id: 2501, title: "The Bourne Identity", poster_path: "/rmeLqyLsM2zQ0iKARu3TbplM9Q6.jpg", vote_average: 7.9, release_date: "2002-06-14", overview: "Wounded to the brink of death and suffering from amnesia, Jason Bourne is rescued at sea by a fisherman. With nothing to go on but a Swiss bank account number, he sets out to discover his true identity.", actors: ["Matt Damon", "Franka Potente", "Chris Cooper"] },
+                    { id: 1771, title: "Captain America: The First Avenger", poster_path: "/2tOgiY533JSFp7OrVlkeRJvsZpI.jpg", vote_average: 6.9, release_date: "2011-07-22", overview: "Steve Rogers, a rejected military soldier, transforms into Captain America after taking a dose of a 'Super-Soldier serum'. But being Captain America comes at a price as he attempts to take down a war monger and a terrorist organization.", actors: ["Chris Evans", "Hugo Weaving", "Tommy Lee Jones"] },
+                    { id: 1366, title: "Rocky", poster_path: "/1hxPlyxoACYuO7kqeeed83LvJuN.jpg", vote_average: 8.0, release_date: "1976-11-21", overview: "When world heavyweight boxing champion, Apollo Creed, visits a local gym, he finds an unknown fighter, Rocky Balboa, whom he wants to face in an exhibition fight.", actors: ["Sylvester Stallone", "Talia Shire", "Burt Young"] },
+                    { id: 98, title: "Gladiator", poster_path: "/bk6nx2rGNdlKtBsB9XcrclVKItv.jpg", vote_average: 8.5, release_date: "2000-05-01", overview: "A former Roman General sets out to exact vengeance against the corrupt emperor who murdered his family and sent him into slavery.", actors: ["Russell Crowe", "Joaquin Phoenix", "Connie Nielsen"] },
+                    { id: 2501, title: "The Bourne Identity", poster_path: "/q0ma8ozYaaol1IvdGjBvj3KllyL.jpg", vote_average: 7.9, release_date: "2002-06-14", overview: "Wounded to the brink of death and suffering from amnesia, Jason Bourne is rescued at sea by a fisherman. With nothing to go on but a Swiss bank account number, he sets out to discover his true identity.", actors: ["Matt Damon", "Franka Potente", "Chris Cooper"] },
                 ],
                 35: [ // Comedy
                     { id: 1624, title: "Trading Places", poster_path: "/8xE3lbuWXwOCl4hhu67L3a0coKG.jpg", vote_average: 7.5, release_date: "1983-06-08", overview: "A snobbish investor and a wily street con artist find their positions reversed as part of a bet by two callous millionaires.", actors: ["Eddie Murphy", "Dan Aykroyd", "Jamie Lee Curtis"] },
-                    { id: 808, title: "Shrek", poster_path: "/iB64vpL3dIObOtMZgX3RqdVdQc8.jpg", vote_average: 7.7, release_date: "2001-05-18", overview: "A mean lord exiles fairytale creatures to the swamp of a grumpy ogre, who must go on a quest and rescue a princess for the lord in order to get his land back.", actors: ["Mike Myers", "Eddie Murphy", "Cameron Diaz"] },
+                    { id: 808, title: "Shrek", poster_path: "/qNHZMe92A7Pyl46qUH29hVOtbSK.jpg", vote_average: 7.7, release_date: "2001-05-18", overview: "A mean lord exiles fairytale creatures to the swamp of a grumpy ogre, who must go on a quest and rescue a princess for the lord in order to get his land back.", actors: ["Mike Myers", "Eddie Murphy", "Cameron Diaz"] },
                 ],
                 18: [ // Drama
                     { id: 278, title: "The Shawshank Redemption", poster_path: "/q6y0Go1tsGEsmtFryDOJo3dEmqu.jpg", vote_average: 9.3, release_date: "1994-09-22", overview: "Two imprisoned men bond over a number of years, finding solace and eventual redemption through acts of common decency.", actors: ["Tim Robbins", "Morgan Freeman", "Bob Gunton"] },
                     { id: 238, title: "The Godfather", poster_path: "/3bhkrj58Vtu7enYsRolD1fZdja1.jpg", vote_average: 9.2, release_date: "1972-03-14", overview: "The aging patriarch of an organized crime dynasty transfers control of his clandestine empire to his reluctant son.", actors: ["Marlon Brando", "Al Pacino", "James Caan"] },
                     { id: 13, title: "Forrest Gump", poster_path: "/saHP97rTPS5eLmrLQEcANmKrsFl.jpg", vote_average: 8.8, release_date: "1994-07-06", overview: "The presidencies of Kennedy and Johnson, the Vietnam War, the Watergate scandal and other historical events unfold from the perspective of an Alabama man with an IQ of 75.", actors: ["Tom Hanks", "Robin Wright", "Gary Sinise"] },
-                    { id: 106646, title: "The Wolf of Wall Street", poster_path: "/vxJ08SvwomfKbpQxC3xAncyD7r8.jpg", vote_average: 8.0, release_date: "2013-12-25", overview: "A New York stockbroker refuses to cooperate in a large securities fraud case involving corruption on Wall Street, corporate banking world and mob infiltration.", actors: ["Leonardo DiCaprio", "Jonah Hill", "Margot Robbie"] },
+                    { id: 106646, title: "The Wolf of Wall Street", poster_path: "/ljsZTbVsrQSqZgWeep2B1QiDKuh.jpg", vote_average: 8.0, release_date: "2013-12-25", overview: "A New York stockbroker refuses to cooperate in a large securities fraud case involving corruption on Wall Street, corporate banking world and mob infiltration.", actors: ["Leonardo DiCaprio", "Jonah Hill", "Margot Robbie"] },
                 ],
                 27: [ // Horror
-                    { id: 578, title: "Jaws", poster_path: "/l1yltvzILaZcx2jY7TpjMsqypI8.jpg", vote_average: 7.5, release_date: "1975-06-18", overview: "When an insatiable great white shark terrorizes the townspeople of Amity Island, the police chief, an oceanographer and a grizzled shark hunter seek to destroy the blood-thirsty beast.", actors: ["Roy Scheider", "Robert Shaw", "Richard Dreyfuss"] },
-                    { id: 694, title: "The Shining", poster_path: "/9fghyNNdcRky9MqHjGiWGAcP8SO.jpg", vote_average: 8.4, release_date: "1980-05-23", overview: "Jack Torrance becomes winter caretaker at the isolated Overlook Hotel in Colorado, hoping to cure his writer's block. He settles in along with his wife, Wendy, and his son, Danny, who is plagued by psychic premonitions.", actors: ["Jack Nicholson", "Shelley Duvall", "Danny Lloyd"] },
+                    { id: 578, title: "Jaws", poster_path: "/ckwrReFkBTHQ2con1Ewm3QSmfsQ.jpg", vote_average: 7.5, release_date: "1975-06-18", overview: "When an insatiable great white shark terrorizes the townspeople of Amity Island, the police chief, an oceanographer and a grizzled shark hunter seek to destroy the blood-thirsty beast.", actors: ["Roy Scheider", "Robert Shaw", "Richard Dreyfuss"] },
+                    { id: 694, title: "The Shining", poster_path: "/iic9YD6zyz2mWIoHVaFy34N0MxX.jpg", vote_average: 8.4, release_date: "1980-05-23", overview: "Jack Torrance becomes winter caretaker at the isolated Overlook Hotel in Colorado, hoping to cure his writer's block. He settles in along with his wife, Wendy, and his son, Danny, who is plagued by psychic premonitions.", actors: ["Jack Nicholson", "Shelley Duvall", "Danny Lloyd"] },
                 ],
                 10749: [ // Romance
                     { id: 597, title: "Titanic", poster_path: "/9xjZS2rlVxm8SFx8kPC3aIGCOYQ.jpg", vote_average: 7.9, release_date: "1997-11-18", overview: "101-year-old Rose DeWitt Bukater tells the story of her life aboard the Titanic, 84 years later. A young Rose boards the ship with her mother and fiancé. Meanwhile, Jack Dawson and Fabrizio De Rossi win third-class tickets aboard the ship.", actors: ["Leonardo DiCaprio", "Kate Winslet", "Billy Zane"] },
-                    { id: 89, title: "Pretty Woman", poster_path: "/8uO0gT8H1d9XZbA5pOCzrW9vElq.jpg", vote_average: 7.1, release_date: "1990-03-23", overview: "A man in a legal but hurtful business needs an escort for some social events, and hires a beautiful prostitute he meets... only to fall in love.", actors: ["Richard Gere", "Julia Roberts", "Hector Elizondo"] }
+                    { id: 89, title: "Pretty Woman", poster_path: "/yJgGZ8YtSIUuTIwYBCs1TjcVrg4.jpg", vote_average: 7.1, release_date: "1990-03-23", overview: "A man in a legal but hurtful business needs an escort for some social events, and hires a beautiful prostitute he meets... only to fall in love.", actors: ["Richard Gere", "Julia Roberts", "Hector Elizondo"] }
                 ],
                 878: [ // Sci-Fi
                     { id: 603, title: "The Matrix", poster_path: "/f89U3ADr1oiB1s9GkdPOEpXUk5H.jpg", vote_average: 8.7, release_date: "1999-03-30", overview: "A computer programmer discovers that reality as he knows it is a simulation created by machines, and joins a rebellion to break free.", actors: ["Keanu Reeves", "Laurence Fishburne", "Carrie-Anne Moss"] },
-                    { id: 27205, title: "Inception", poster_path: "/9gk7adHYeDvHkCSEqAvQNLV5Uge.jpg", vote_average: 8.8, release_date: "2010-07-15", overview: "A thief who steals corporate secrets through the use of dream-sharing technology is given the inverse task of planting an idea into the mind of a C.E.O.", actors: ["Leonardo DiCaprio", "Joseph Gordon-Levitt", "Ellen Page"] }
+                    { id: 27205, title: "Inception", poster_path: "/ljsZTbVsrQSqZgWeep2B1QiDKuh.jpg", vote_average: 8.8, release_date: "2010-07-15", overview: "A thief who steals corporate secrets through the use of dream-sharing technology is given the inverse task of planting an idea into the mind of a C.E.O.", actors: ["Leonardo DiCaprio", "Joseph Gordon-Levitt", "Ellen Page"] }
                 ],
                 53: [ // Thriller
-                    { id: 550, title: "Fight Club", poster_path: "/pB8BM7pdSp6B6Ih7QZ4DrQ3PmJK.jpg", vote_average: 8.8, release_date: "1999-10-15", overview: "A nameless first person narrator attends support groups in attempt to subdue his emotional state and relieve his insomniac state. When he meets Marla, another fake attendee of support groups, his life seems to become a little more bearable.", actors: ["Brad Pitt", "Edward Norton", "Helena Bonham Carter"] },
-                    { id: 475557, title: "Joker", poster_path: "/udDclJoHjfjb8fgsJuTGVUaOWC8.jpg", vote_average: 8.4, release_date: "2019-10-02", overview: "In Gotham City, mentally troubled comedian Arthur Fleck is disregarded and mistreated by society. He then embarks on a downward spiral of revolution and bloody crime. This path brings him face-to-face with his alter-ego: the Joker.", actors: ["Joaquin Phoenix", "Robert De Niro", "Zazie Beetz"] },
+                    { id: 550, title: "Fight Club", poster_path: "/jSziioSwPVrOy9Yow3XhWIBDjq1.jpg", vote_average: 8.8, release_date: "1999-10-15", overview: "A nameless first person narrator attends support groups in attempt to subdue his emotional state and relieve his insomniac state. When he meets Marla, another fake attendee of support groups, his life seems to become a little more bearable.", actors: ["Brad Pitt", "Edward Norton", "Helena Bonham Carter"] },
+                    { id: 475557, title: "Joker", poster_path: "/cI4Ng3oX0CEJiY3wMxcfszQZbcI.jpg", vote_average: 8.4, release_date: "2019-10-02", overview: "In Gotham City, mentally troubled comedian Arthur Fleck is disregarded and mistreated by society. He then embarks on a downward spiral of revolution and bloody crime. This path brings him face-to-face with his alter-ego: the Joker.", actors: ["Joaquin Phoenix", "Robert De Niro", "Zazie Beetz"] },
                 ],
                 80: [ // Crime
-                    { id: 769, title: "Goodfellas", poster_path: "/aKuFiU83sXISXLc5BD7k53mFFSU.jpg", vote_average: 8.7, release_date: "1990-09-12", overview: "The story of Henry Hill and his life in the mob, covering his relationship with his wife Karen Hill and his mob partners Jimmy Conway and Tommy DeVito.", actors: ["Robert De Niro", "Ray Liotta", "Joe Pesci"] },
-                    { id: 680, title: "Pulp Fiction", poster_path: "/d5iIlFn5s0ImszYzBPb8JPIfbXD.jpg", vote_average: 8.9, release_date: "1994-10-14", overview: "The lives of two mob hitmen, a boxer, a gangster and his wife, and a pair of diner bandits intertwine in four tales of violence and redemption.", actors: ["John Travolta", "Samuel L. Jackson", "Uma Thurman"] }
+                    { id: 769, title: "Goodfellas", poster_path: "/aKuFiU82s5ISJpGZp7YkIr3kCUd.jpg", vote_average: 8.7, release_date: "1990-09-12", overview: "The story of Henry Hill and his life in the mob, covering his relationship with his wife Karen Hill and his mob partners Jimmy Conway and Tommy DeVito.", actors: ["Robert De Niro", "Ray Liotta", "Joe Pesci"] },
+                    { id: 680, title: "Pulp Fiction", poster_path: "/vQWk5YBFWF4bZaofAbv0tShwBvQ.jpg", vote_average: 8.9, release_date: "1994-10-14", overview: "The lives of two mob hitmen, a boxer, a gangster and his wife, and a pair of diner bandits intertwine in four tales of violence and redemption.", actors: ["John Travolta", "Samuel L. Jackson", "Uma Thurman"] }
                 ],
                 16: [ // Animation
-                    { id: 862, title: "Toy Story", poster_path: "/uXDfjJbdP4ijW5hWSBrPrlKpxab.jpg", vote_average: 8.3, release_date: "1995-10-30", overview: "Led by Woody, Andy's toys live happily in his room until Andy's birthday brings Buzz Lightyear onto the scene. Afraid of losing his place in Andy's heart, Woody plots against Buzz. But when circumstances separate Buzz and Woody from their owner, the duo eventually learns to put aside their differences.", actors: ["Tom Hanks", "Tim Allen", "Don Rickles"] },
-                    { id: 12, title: "Finding Nemo", poster_path: "/7PyJcsBhpt9gEWzXy6Wz4ah6zL8.jpg", vote_average: 8.1, release_date: "2003-05-30", overview: "Nemo, an adventurous young clownfish, is unexpectedly taken from his Great Barrier Reef home to a dentist's office aquarium. It's up to his worrisome father Marlin and a friendly but forgetful fish Dory to bring Nemo home -- meeting vegetarian sharks, surfer dude turtles, hypnotic jellyfish, hungry seagulls, and more.", actors: ["Albert Brooks", "Ellen DeGeneres", "Alexander Gould"] }
+                    { id: 862, title: "Toy Story", poster_path: "/rki5qLuwb0xnnE9seehxO9TlLhW.jpg", vote_average: 8.3, release_date: "1995-10-30", overview: "Led by Woody, Andy's toys live happily in his room until Andy's birthday brings Buzz Lightyear onto the scene. Afraid of losing his place in Andy's heart, Woody plots against Buzz. But when circumstances separate Buzz and Woody from their owner, the duo eventually learns to put aside their differences.", actors: ["Tom Hanks", "Tim Allen", "Don Rickles"] },
+                    { id: 12, title: "Finding Nemo", poster_path: "/cCovtlN16ykvyFYnzKyv3dFtceG.jpg", vote_average: 8.1, release_date: "2003-05-30", overview: "Nemo, an adventurous young clownfish, is unexpectedly taken from his Great Barrier Reef home to a dentist's office aquarium. It's up to his worrisome father Marlin and a friendly but forgetful fish Dory to bring Nemo home -- meeting vegetarian sharks, surfer dude turtles, hypnotic jellyfish, hungry seagulls, and more.", actors: ["Albert Brooks", "Ellen DeGeneres", "Alexander Gould"] }
                 ]
             };
 
             // Merge sample movies with TMDB movies
+            console.log('Merging sample movies with existing data...');
             for (const [genreId, sampleMovies] of Object.entries(sampleMoviesByGenre)) {
                 if (!moviesByGenre[genreId]) {
                     moviesByGenre[genreId] = [];
                 }
+                
+                console.log(`Genre ${genreId}: Adding ${sampleMovies.length} sample movies to ${moviesByGenre[genreId].length} existing movies`);
                 
                 // Add sample movies to the beginning of each genre
                 moviesByGenre[genreId] = [...sampleMovies, ...moviesByGenre[genreId]];
@@ -821,8 +880,13 @@
                 moviesByGenre[genreId] = moviesByGenre[genreId].filter((movie, index, self) => 
                     index === self.findIndex(m => m.id === movie.id)
                 );
+                
+                console.log(`Genre ${genreId}: Final count after merge: ${moviesByGenre[genreId].length} movies`);
             }
 
+            console.log('=== SAMPLE DATA LOADING COMPLETE ===');
+            console.log('Final moviesByGenre structure:', Object.keys(moviesByGenre).map(key => `${key}: ${moviesByGenre[key].length} movies`));
+            
             renderFeaturedMovies();
             renderGenreSections();
         }
@@ -850,12 +914,20 @@
 
         // Render genre sections
         function renderGenreSections() {
+            console.log('=== RENDERING GENRE SECTIONS ===');
+            console.log('Available genres:', genres.map(g => `${g.name} (ID: ${g.id})`));
+            console.log('moviesByGenre keys:', Object.keys(moviesByGenre));
+            
             const container = document.getElementById('genreSections');
             container.innerHTML = '';
 
             genres.forEach(genre => {
                 const movies = moviesByGenre[genre.id] || [];
-                if (movies.length === 0) return;
+                console.log(`Rendering ${genre.name} (ID: ${genre.id}): ${movies.length} movies available`);
+                if (movies.length === 0) {
+                    console.log(`Skipping ${genre.name} - no movies available`);
+                    return;
+                }
 
                 const section = document.createElement('section');
                 section.className = 'genreSection';
@@ -873,6 +945,7 @@
 
                 // Load movies for this genre
                 const moviesContainer = section.querySelector(`#genre-${genre.id}`);
+                console.log(`Adding ${movies.length} movies to ${genre.name} container:`, movies.map(m => m.title));
                 movies.forEach(movie => {
                     const movieElement = createMoviePoster(movie);
                     moviesContainer.appendChild(movieElement);
@@ -886,13 +959,20 @@
             poster.className = 'moviePoster';
             poster.onclick = () => showMovieModal(movie);
 
-            const posterUrl = movie.poster_path 
-                ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
-                : 'https://via.placeholder.com/156x234/333/666?text=Movie';
+            // Better poster URL handling with validation
+            let posterUrl;
+            if (movie.poster_path && movie.poster_path !== 'null' && movie.poster_path.trim() !== '') {
+                posterUrl = `https://image.tmdb.org/t/p/w500${movie.poster_path}`;
+            } else {
+                posterUrl = 'https://via.placeholder.com/156x234/333/666?text=Movie';
+                console.log(`No poster for movie: ${movie.title} (ID: ${movie.id})`);
+            }
 
             poster.innerHTML = `
                 <img src="${posterUrl}" alt="${movie.title}" class="posterImage" 
-                     onerror="this.src='https://via.placeholder.com/156x234/333/666?text=Movie'">
+                     onerror="this.src='https://via.placeholder.com/156x234/333/666?text=Movie'"
+                     onload="this.style.opacity='1'"
+                     style="opacity: 0; transition: opacity 0.3s ease;">
                 ${movie.vote_average ? `
                     <div class="ratingBadge">
                         <span class="ratingText">★ ${movie.vote_average.toFixed(1)}</span>
@@ -909,6 +989,16 @@
         // Show movie modal
         function showMovieModal(movie) {
             selectedMovie = movie;
+            
+            // Emit movie selection to socket server for real-time updates
+            if (socket && socket.connected) {
+                socket.emit('select-movie', {
+                    roomId: 'default-room',
+                    movie: movie,
+                    clientId: socket.id
+                });
+                console.log('Emitted movie selection:', movie.title);
+            }
             
             const modalBody = document.getElementById('modalBody');
             const posterUrl = movie.poster_path 

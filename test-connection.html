@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Socket Connection Test</title>
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+</head>
+<body>
+    <h1>Socket Connection Test</h1>
+    <div id="status">Testing connection...</div>
+    <div id="logs"></div>
+
+    <script>
+        const logs = document.getElementById('logs');
+        const status = document.getElementById('status');
+        
+        function log(message) {
+            console.log(message);
+            logs.innerHTML += '<div>' + message + '</div>';
+        }
+        
+        log('=== TEST STARTING ===');
+        log('Protocol: ' + window.location.protocol);
+        log('Hostname: ' + window.location.hostname);
+        log('Socket.IO loaded: ' + (typeof io !== 'undefined'));
+        
+        try {
+            log('Attempting to connect to localhost:3002...');
+            const socket = io('http://localhost:3002');
+            
+            log('Socket object created');
+            log('Socket ID: ' + socket.id);
+            log('Socket connected: ' + socket.connected);
+            
+            socket.on('connect', () => {
+                log('=== CONNECTED ===');
+                log('Socket ID on connect: ' + socket.id);
+                status.textContent = 'CONNECTED!';
+                status.style.color = 'green';
+            });
+            
+            socket.on('disconnect', () => {
+                log('=== DISCONNECTED ===');
+                status.textContent = 'DISCONNECTED';
+                status.style.color = 'red';
+            });
+            
+            socket.on('error', (error) => {
+                log('=== ERROR === ' + error);
+                status.textContent = 'ERROR: ' + error;
+                status.style.color = 'red';
+            });
+            
+            // Test room joining
+            setTimeout(() => {
+                if (socket.connected) {
+                    log('Testing room join...');
+                    socket.emit('join-room', { roomId: 'test-room' });
+                }
+            }, 1000);
+            
+        } catch (error) {
+            log('=== EXCEPTION === ' + error.message);
+            status.textContent = 'EXCEPTION: ' + error.message;
+            status.style.color = 'red';
+        }
+    </script>
+</body>
+</html>
