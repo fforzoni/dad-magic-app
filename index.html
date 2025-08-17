@@ -105,13 +105,12 @@
 
         /* Search Dropdown */
         .searchDropdownOverlay {
-            position: absolute;
-            top: 100%;
+            position: fixed;
+            top: 80px;
             left: 0;
             right: 0;
             z-index: 999999;
             pointer-events: none;
-            margin-top: 5px;
         }
 
         .searchDropdown {
@@ -1077,9 +1076,6 @@
                     return;
                 }
 
-                // Show loading spinner
-                document.getElementById('searchSpinner').style.display = 'block';
-
                 searchTimeout = setTimeout(() => {
                     performSearch(query);
                 }, 300);
@@ -1103,8 +1099,6 @@
             } catch (error) {
                 console.error('Search error:', error);
                 showSearchResults([]);
-            } finally {
-                document.getElementById('searchSpinner').style.display = 'none';
             }
         }
 
