@@ -96,11 +96,13 @@
         .no-movie {
             font-size: 4rem;
             margin-bottom: 20px;
+            text-align: center;
         }
         .no-movie-text {
             font-size: 1.5rem;
             margin-bottom: 10px;
             color: #cccccc;
+            text-align: center;
         }
 
         .movie-poster {
@@ -267,6 +269,24 @@
             .actor-item {
                 font-size: 0.8rem;
             }
+
+            /* Mobile-specific styling for no movie state */
+            .no-movie {
+                font-size: 3rem;
+                margin-bottom: 15px;
+            }
+
+            .no-movie-text {
+                font-size: 1.2rem;
+                margin-bottom: 8px;
+            }
+
+            .movie-display {
+                justify-content: center;
+                align-items: center;
+                text-align: center;
+                padding: 20px;
+            }
         }
     </style>
 </head>
@@ -293,9 +313,7 @@
             <div class="instructions-title">🎭 How It Works</div>
             <ul class="instructions-list">
                 <li>1. <strong>Customer selects a movie</strong> from the main app</li>
-                <li>2. <strong>Real-time sync</strong> via WebSocket connection</li>
-                <li>3. <strong>Watch Live</strong>: The selected movie will appear here instantly!</li>
-                <li>4. <strong>Real-time Updates</strong>: Every movie selection is shown in real-time via WebSocket</li>
+                <li>2. <strong>Watch Live</strong>: The selected movie will appear here instantly!</li>
             </ul>
         </div>
     </div>
