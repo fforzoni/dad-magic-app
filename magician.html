@@ -193,26 +193,35 @@
         /* Responsive design for mobile */
         @media (max-width: 768px) {
             .movie-content {
-                flex-direction: column;
+                flex-direction: row;
                 gap: 20px;
-                text-align: center;
+                align-items: flex-start;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .movie-poster-container {
+                flex-shrink: 0;
             }
 
             .movie-info-container {
-                text-align: center;
+                flex: 1;
+                min-width: 200px;
+                text-align: left;
             }
 
             .actors-section {
-                text-align: center;
+                text-align: left;
             }
 
             .movie-poster {
-                max-width: 250px;
-                max-height: 375px;
+                max-width: 200px;
+                max-height: 300px;
             }
 
             .movie-display {
                 margin-bottom: 30px;
+                padding: 20px;
             }
 
             .instructions-section {
@@ -232,6 +241,27 @@
                 flex-direction: column;
                 justify-content: center;
                 align-items: center;
+            }
+
+            /* Ensure text is readable on small screens */
+            .movie-title {
+                font-size: 1.5rem;
+            }
+
+            .movie-year {
+                font-size: 1rem;
+            }
+
+            .movie-rating {
+                font-size: 1rem;
+            }
+
+            .actors-title {
+                font-size: 1rem;
+            }
+
+            .actor-item {
+                font-size: 0.9rem;
             }
         }
     </style>
