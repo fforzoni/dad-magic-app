@@ -27,6 +27,21 @@
             top: 0;
             z-index: 1000;
             box-shadow: 0 4px 20px rgba(245, 197, 24, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .imdbHeader.scrolled {
+            padding: 10px 0;
+        }
+
+        .imdbHeader.scrolled .searchContainer {
+            opacity: 0;
+            transform: translateY(-10px);
+            pointer-events: none;
+        }
+
+        .imdbHeader.scrolled .imdbTitle {
+            font-size: 2rem;
         }
 
         .headerContent {
@@ -1132,6 +1147,23 @@
 
         // Initialize app when page loads
         document.addEventListener('DOMContentLoaded', initApp);
+
+        // Handle header scroll effects
+        let lastScrollTop = 0;
+        const header = document.querySelector('.imdbHeader');
+        const scrollThreshold = 100;
+
+        window.addEventListener('scroll', () => {
+            const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+            
+            if (scrollTop > scrollThreshold) {
+                header.classList.add('scrolled');
+            } else {
+                header.classList.remove('scrolled');
+            }
+            
+            lastScrollTop = scrollTop;
+        });
     </script>
 </body>
 </html>
